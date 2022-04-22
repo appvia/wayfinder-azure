@@ -1,0 +1,33 @@
+*.DS_Store
+*.orig
+.idea
+.vscode
+
+# Created by https://www.toptal.com/developers/gitignore/api/go,vim,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=go,vim,visualstudiocode
+
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+# Persistent undo
+[._]*.un~
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
+# End of https://www.toptal.com/developers/gitignore/api/go,vim,visualstudiocode

@@ -1,0 +1,208 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusterName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Wayfinder management cluster."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "The location of the Managed Cluster resource."
+      }
+    },
+    "email": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A valid email address (for requesting a free license)"
+      }
+    },
+    "licence": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A licence if you have one already"
+      }
+    },
+    "utcValue": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
+    }
+  },
+  "variables": {
+    "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
+    "dsRoleAssignmentId": "[guid(resourceGroup().id, variables('dsRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', variables('wfInstallIdentity')))]",
+    "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+    "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
+    "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+    "wfInstallIdentity": "wayfinderInstaller",
+    "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
+    "wfInstanceID": "[uniqueString(resourceGroup().id)]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "[variables('wfInstallIdentity')]",
+      "apiVersion": "2018-11-30",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[variables('dsRoleAssignmentId')]",
+      "comments": "allows Wayfinder installer access to the resource group",
+      "properties": {
+        "roleDefinitionId": "[variables('dsRoleDefinitionId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
+        "scope": "[resourceGroup().id]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+      ]
+    },
+    {
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2020-11-01",
+        "location": "[parameters('location')]",
+        "name": "[variables('ingressIPName')]",
+        "properties": {
+            "publicIPAllocationMethod": "Static"
+        },
+        "sku": {
+            "name": "Standard"
+        }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[variables('aksRoleAssignmentId')]",
+      "properties": {
+        "roleDefinitionId": "[variables('aksRoleDefinitionId')]",
+        "principalId": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-11-01', 'Full').identity.principalId]",
+        "scope": "[resourceGroup().id]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2021-10-01",
+      "name": "[parameters('clusterName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "dnsPrefix": "wayfinder",
+        "enablePodSecurityPolicy": true,
+        "enableRBAC": true,
+        "kubernetesVersion": "1.22.6",
+        "networkProfile": {
+            "networkPlugin": "azure",
+            "networkPolicy": "calico",
+            "loadBalancerSku": "standard"
+        },
+        "agentPoolProfiles": [
+          {
+            "name": "system",
+            "osDiskSizeGB": 30,
+            "count": 3,
+            "minCount": 1,
+            "maxCount": 10,
+            "vmSize": "Standard_D2_v2",
+            "osType": "Linux",
+            "mode": "System",
+            "enableAutoScaling": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "name": "wayfinder",
+      "apiVersion": "2020-10-01",
+      "location": "[parameters('location')]",
+      "kind": "AzureCLI",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('ingressIPName'))]",
+        "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]"
+      ],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]": {}
+        }
+      },
+      "properties": {
+        "forceUpdateTag": "[parameters('utcValue')]",
+        "AzCliVersion": "2.10.1",
+        "timeout": "PT30M",
+        "environmentVariables": [
+          {
+            "name": "SUBSCRIPTION_ID",
+            "value": "[subscription().subscriptionId]"
+          },
+          {
+            "name": "REGION",
+            "value": "[parameters('location')]"
+          },
+          {
+            "name": "CLUSTER_NAME",
+            "value": "[parameters('clusterName')]"
+          },
+          {
+            "name": "RESOURCE_GROUP",
+            "value": "[resourceGroup().name]"
+          },
+          {
+            "name": "WF_EMAIL",
+            "value": "[parameters('email')]"
+          },
+          {
+            "name": "WF_LICENCE",
+            "value": "[parameters('licence')]"
+          },
+          {
+            "name": "IP_NAME",
+            "value": "[variables('ingressIPName')]"
+          },
+          {
+            "name": "WF_INSTANCE_ID",
+            "value": "[variables('wfInstanceID')]"
+          }
+        ],
+        "primaryScriptUri": "[variables('installScriptUri')]",
+        "cleanupPreference": "OnExpiration",
+        "retentionInterval": "P1D"
+      }
+    }
+  ],
+  "outputs": {
+    "CreateLoginProfile": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.PostInstallCommands.firstLogin]"
+    },
+    "ChangePassword": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.PostInstallCommands.changePassword]"
+    },
+    "InitialPassword": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.User.Password]"
+    },
+    "WayfinderPortalURL": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.URLs.UI]"
+    }
+  }
+}

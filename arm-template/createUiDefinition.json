@@ -1,0 +1,163 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": true,
+            "resourceTypes": [
+                "Microsoft.ManagedIdentity/userAssignedIdentities",
+                "Microsoft.Authorization/roleAssignments",
+                "Microsoft.Resources/deploymentScripts",
+                "Microsoft.ContainerService/managedClusters",
+                "Microsoft.Network/publicIPAddresses"
+            ],
+            "basics": {
+                "description": "This template deploys [Wayfinder?](https://www.appvia.io/wayfinder). Wayfinder provides creation and fleet management of cloud Kubernetes. For more information see [Wayfinder Documentation](https://docs.appvia.io/wayfinder).",
+                "subscription": {
+                    "constraints": {
+                        "validations": [
+                            {
+                                "permission": "Microsoft.ContainerInstance/allow",
+                                "message": "Must have allow permission with the Microsoft.ContainerInstance."
+                            }
+                        ]
+                    },
+                    "resourceProviders": [
+                        "Microsoft.ManagedIdentity",
+                        "Microsoft.Authorization",
+                        "Microsoft.Resources",
+                        "Microsoft.ContainerService",
+                        "Microsoft.ContainerInstance",
+                        "Microsoft.Network"
+                    ]
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "clusterName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Specify the name of the Wayfinder installation (AKS cluster name)",
+                "defaultValue": "wayfinder",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z-]{3,10}$",
+                    "validationMessage": "The Cluster Name must be between 3 and 8 characters long and contain letters, numbers and hyphens only."
+                }
+            }
+        ],
+        "steps": [
+            {
+                "name": "license",
+                "label": "Select License Type",
+                "elements":[
+                    {
+                        "name": "announcement",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Either provide an email address for a new free license or provide a license key",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://www.appvia.io/wayfinder-free"
+                            }
+                        }
+                    },
+                    {
+                        "name": "newFreeLicense",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Sign up for a new free license?",
+                        "defaultValue": true,
+                        "toolTip": "Sign up for a new free license (specify no if you have an existing free or other license)",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Sign up for free license",
+                                    "value": true
+                                },
+                                {
+                                    "label": "Existing License",
+                                    "value": false
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "freeLicense",
+                        "label": "Free License",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[equals(steps('license').newFreeLicense, true)]",
+                        "elements": [
+                            {
+                                "name": "email",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Free License Email",
+                                "defaultValue": "",
+                                "toolTip": "Please enter a valid email account",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",
+                                    "validationMessage": "Email is not valid. Please re-enter."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "existingLicense",
+                        "label": "Existing License",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[equals(steps('license').newFreeLicense, false)]",
+                        "elements": [
+                            {
+                                "name": "key",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "License Key",
+                                "defaultValue": "",
+                                "toolTip": "Please enter a valid license Key",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^key\/.{500,700}$",
+                                    "validationMessage": "License Key must be in the correct format. Please re-enter."
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "acceptLegal",
+                "label": "Agreement",
+                "elements": [
+                    {
+                        "name": "accept",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "I understand this will fail if the license or email is invalid.",
+                        "constraints": {
+                            "required": true,
+                            "validationMessage": "Please acknowledge the license type."
+                        }
+                    },
+                    {
+                        "name": "legalAccept",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "I agree to the terms and conditions.",
+                        "constraints": {
+                            "required": true,
+                            "validationMessage": "Please acknowledge the legal conditions."
+                        }
+                    }
+                ],
+                "visible": true
+            }
+         ],
+        "outputs": {
+            "location": "[location()]",
+            "clusterName": "[basics('clusterName')]",
+            "email": "[steps('license').freeLicense.email]",
+            "licence": "[steps('license').existingLicense.key]"
+        }
+    }
+}
