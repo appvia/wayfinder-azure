@@ -92,6 +92,14 @@
                         "visible": "[equals(steps('license').newFreeLicense, true)]",
                         "elements": [
                             {
+                                "name": "announcement",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "Wayfinder will not install if the email cannot be used for a license"
+                                }
+                            },
+                            {
                                 "name": "email",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Free License Email",
@@ -111,6 +119,14 @@
                         "type": "Microsoft.Common.Section",
                         "visible": "[equals(steps('license').newFreeLicense, false)]",
                         "elements": [
+                            {
+                                "name": "announcement",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "Wayfinder will not install if the license key is invalid"
+                                }
+                            },
                             {
                                 "name": "key",
                                 "type": "Microsoft.Common.TextBox",
@@ -132,18 +148,20 @@
                 "label": "Agreement",
                 "elements": [
                     {
-                        "name": "accept",
-                        "type": "Microsoft.Common.CheckBox",
-                        "label": "I understand this will fail if the license or email is invalid.",
-                        "constraints": {
-                            "required": true,
-                            "validationMessage": "Please acknowledge the license type."
+                        "name": "announcement",
+                        "type": "Microsoft.Common.TextBlock",
+                        "options": {
+                            "text": "Please review the free Wayfinder license",
+                            "link": {
+                                "label": "Free License",
+                                "uri": "https://drive.google.com/file/d/1TcX2SdYQSAoEuvi9vgmj1GnhMxw-YpuU/view?usp=sharing"
+                            }
                         }
                     },
                     {
                         "name": "legalAccept",
                         "type": "Microsoft.Common.CheckBox",
-                        "label": "I agree to the terms and conditions.",
+                        "label": "I agree to the terms and conditions for the license.",
                         "constraints": {
                             "required": true,
                             "validationMessage": "Please acknowledge the legal conditions."
