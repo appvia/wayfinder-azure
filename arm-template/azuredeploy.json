@@ -19,7 +19,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "A valid email address (for requesting a free license)"
+        "description": "Email address (required to generate a free license if you do not have one)"
       }
     },
     "license": {
