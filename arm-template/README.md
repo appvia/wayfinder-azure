@@ -19,6 +19,8 @@ This template deploys [Wayfinder](https://www.appvia.io/wayfinder). Wayfinder pr
 After installation you must follow these steps to logon and set a password:
 
 1. [Download the Wayfinder cli](https://docs.appvia.io/wayfinder/cli)
-1. Obtain the commands and password from the deployment OUTPUTS
-1. See the deployment outputs and run the post install commands.
+1. Obtain the commands and password from the deployment Outputs in the console:
+    <img src="images/Azure-Template-Outputs.png"/>
+
+1. Run the post install commands, as obtained, from the outputs.
 1. See [Wayfinder Documentation](https://docs.appvia.io/wayfinder).
