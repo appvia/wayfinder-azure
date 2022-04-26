@@ -175,7 +175,7 @@
             "location": "[location()]",
             "clusterName": "[basics('clusterName')]",
             "email": "[steps('license').freeLicense.email]",
-            "licence": "[steps('license').existingLicense.key]"
+            "license": "[steps('license').existingLicense.key]"
         }
     }
 }

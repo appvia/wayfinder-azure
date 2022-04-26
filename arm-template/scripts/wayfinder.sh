@@ -57,7 +57,7 @@ deploy() {
     --azure-ingress-ip-name ${IP_NAME} \
     --use-existing-cluster \
     --json-file ${AZ_SCRIPTS_OUTPUT_PATH} \
-    ${LICENCE_OPT:-}
+    ${LICENSE_OPT:-}
 }
 
 check-envs() {
@@ -73,11 +73,11 @@ check-envs() {
     ; do check_var ${var:-}
   done
 
-  if [[ -n ${WF_LICENCE:-} ]]; then
-    LICENCE_OPT="--license-key ${WF_LICENCE:-}"
+  if [[ -n ${WF_LICENSE:-} ]]; then
+    LICENSE_OPT="--license-key ${WF_LICENSE:-}"
   else
     check_var WF_EMAIL
-    LICENCE_OPT="--license-email ${WF_EMAIL}"
+    LICENSE_OPT="--license-email ${WF_EMAIL}"
   fi
 }
 

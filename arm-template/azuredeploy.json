@@ -22,11 +22,11 @@
         "description": "A valid email address (for requesting a free license)"
       }
     },
-    "licence": {
+    "license": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "A licence if you have one already"
+        "description": "A license if you have one already"
       }
     },
     "utcValue": {
@@ -169,8 +169,8 @@
             "value": "[parameters('email')]"
           },
           {
-            "name": "WF_LICENCE",
-            "value": "[parameters('licence')]"
+            "name": "WF_LICENSE",
+            "value": "[parameters('license')]"
           },
           {
             "name": "IP_NAME",
