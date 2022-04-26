@@ -43,7 +43,7 @@
                 "constraints": {
                     "required": true,
                     "regex": "^[a-z0-9A-Z-]{3,10}$",
-                    "validationMessage": "The Cluster Name must be between 3 and 8 characters long and contain letters, numbers and hyphens only."
+                    "validationMessage": "The Cluster Name must be between 3 and 10 characters long and contain letters, numbers and hyphens only."
                 }
             }
         ],
@@ -154,7 +154,7 @@
                             "text": "Please review the free Wayfinder license",
                             "link": {
                                 "label": "Free License",
-                                "uri": "https://drive.google.com/file/d/1TcX2SdYQSAoEuvi9vgmj1GnhMxw-YpuU/view?usp=sharing"
+                                "uri": "https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement"
                             }
                         }
                     },
