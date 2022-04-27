@@ -20,16 +20,16 @@ After installation you must follow these steps to logon and set a password:
 
 1. [Download the Wayfinder cli](https://docs.appvia.io/wayfinder/cli)
 1. Obtain the commands and password from the deployment Outputs in the console:
-    <img src="images/Azure-Template-Outputs.png"/>
+    <img height="296" src="images/Azure-Template-Outputs.png"/>
 
 1. Run the post install commands, as obtained, from the outputs.
 1. See [Wayfinder Documentation](https://docs.appvia.io/wayfinder).
 
-#### Delete Installation
+### Delete Installation
 
 To delete the install of Wayfinder and the AKS cluster, simply delete the resource group used by the deployment above:
 
 1. Identify the resource group you specified in the deployment e.g.
-    <img src="images/Azure-deployment-complete-subscription.png"/>
+    <img height="215" src="images/Azure-deployment-complete-subscription.png"/>
 
 1. [Delete the resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#delete-resource-groups)
