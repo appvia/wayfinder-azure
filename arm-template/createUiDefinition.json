@@ -151,7 +151,7 @@
                         "name": "announcement",
                         "type": "Microsoft.Common.TextBlock",
                         "options": {
-                            "text": "Please review the free Wayfinder license",
+                            "text": "If you are requesting a free license, please review it",
                             "link": {
                                 "label": "Free License",
                                 "uri": "https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement"
@@ -161,7 +161,7 @@
                     {
                         "name": "legalAccept",
                         "type": "Microsoft.Common.CheckBox",
-                        "label": "I agree to the terms and conditions for the license.",
+                        "label": "I agree to the terms and conditions for the license or I do not have a free license.",
                         "constraints": {
                             "required": true,
                             "validationMessage": "Please acknowledge the legal conditions."
