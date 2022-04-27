@@ -29,5 +29,7 @@ After installation you must follow these steps to logon and set a password:
 
 To delete the install of Wayfinder and the AKS cluster, simply delete the resource group used by the deployment above:
 
-1. Identify the resource group you specified (or follow the link to the resource group from the deployment)
+1. Identify the resource group you specified in the deployment e.g.
+    <img src="images/Azure-deployment-complete-subscription.png"/>
+
 1. [Delete the resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#delete-resource-groups)
