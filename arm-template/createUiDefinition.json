@@ -10,6 +10,7 @@
                 "Microsoft.Authorization/roleAssignments",
                 "Microsoft.Resources/deploymentScripts",
                 "Microsoft.ContainerService/managedClusters",
+                "Microsoft.ContainerService/PodSecurityPolicyPreview",
                 "Microsoft.Network/publicIPAddresses"
             ],
             "basics": {
@@ -20,6 +21,10 @@
                             {
                                 "permission": "Microsoft.ContainerInstance/allow",
                                 "message": "Must have allow permission with the Microsoft.ContainerInstance."
+                            },
+                            {
+                                "permission": "Microsoft.ContainerService/PodSecurityPolicyPreview/allow",
+                                "message": "Must have allow permission with the Microsoft.ContainerInstance/PodSecurityPolicyPreview."
                             }
                         ]
                     },
