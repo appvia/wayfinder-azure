@@ -11,7 +11,7 @@
 #### Deploy
 This template deploys [Wayfinder](https://www.appvia.io/wayfinder). Wayfinder provides management of cloud Kubernetes. For more information see [Wayfinder Documentation](https://docs.appvia.io/wayfinder).
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2FcreateUiDefinition.json" rel="nofollow"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy To Azure" style="max-width: 100%;" target="_blank"></a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2FcreateUiDefinition.json" rel="nofollow"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy To Azure" style="max-width: 100%;" rel="noopener noreferrer" target="_blank"></a>
 <a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2Fazuredeploy.json" rel="nofollow"><img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true" alt="Visualize" style="max-width: 100%;" target="_blank"></a></p>
 
 #### Post Install Steps
@@ -24,3 +24,10 @@ After installation you must follow these steps to logon and set a password:
 
 1. Run the post install commands, as obtained, from the outputs.
 1. See [Wayfinder Documentation](https://docs.appvia.io/wayfinder).
+
+#### Delete Installation
+
+To delete the install of Wayfinder and the AKS cluster, simply delete the resource group used by the deployment above:
+
+1. Identify the resource group you specified (or follow the link to the resource group from the deployment)
+1. [Delete the resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#delete-resource-groups)
