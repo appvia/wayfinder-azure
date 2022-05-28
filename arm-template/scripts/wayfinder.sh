@@ -21,9 +21,9 @@ set -o pipefail
 ${TRACE:+set -x}
 
 # Dev latest
-WF_INSTALL_URL="https://storage.googleapis.com/wayfinder-dev-releases/latest/wf-cli-linux-amd64"
+#WF_INSTALL_URL="https://storage.googleapis.com/wayfinder-dev-releases/latest/wf-cli-linux-amd64"
 # TODO update to release latest (after 1.3 is released)
-#WF_INSTALL_URL=https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64
+WF_INSTALL_URL=https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64
 
 error_exit() {
     echo ${1}
@@ -55,7 +55,6 @@ deploy() {
     --azure-resourcegroup ${RESOURCE_GROUP} \
     --automatic-dns \
     --azure-ingress-ip-name ${IP_NAME} \
-    --use-existing-cluster \
     --json-file ${AZ_SCRIPTS_OUTPUT_PATH} \
     ${LICENSE_OPT:-}
 }
