@@ -53,7 +53,6 @@ deploy() {
     --non-interactive \
     --disable-idp \
     --azure-resourcegroup ${RESOURCE_GROUP} \
-    --automatic-dns \
     --azure-ingress-ip-name ${IP_NAME} \
     --json-file ${AZ_SCRIPTS_OUTPUT_PATH} \
     ${LICENSE_OPT:-}
