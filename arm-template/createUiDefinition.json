@@ -40,6 +40,7 @@
                 "name": "clusterName",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Specify the name of the Wayfinder installation (AKS cluster name)",
+                "toolTip": "The name of the cluster Wayfinder will be installed into",
                 "defaultValue": "wayfinder",
                 "constraints": {
                     "required": true,
@@ -163,6 +164,7 @@
                         "name": "legalAccept",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "I agree to the terms and conditions for the license or I do not have a free license.",
+                        "toolTip": "Whether you agree to the required terms and conditions",
                         "constraints": {
                             "required": true,
                             "validationMessage": "Please acknowledge the legal conditions."
