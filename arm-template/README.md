@@ -12,6 +12,40 @@ This template deploys [Wayfinder](https://www.appvia.io/wayfinder). Wayfinder pr
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2FcreateUiDefinition.json" rel="nofollow"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy To Azure" style="max-width: 100%;" rel="noopener noreferrer" target="_blank"></a>
 <a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fappvia%2Fwayfinder-azure%2Fmaster%2Farm-template%2Fazuredeploy.json" rel="nofollow"><img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true" alt="Visualize" style="max-width: 100%;" target="_blank"></a></p>
 
+### Validating Template changes
+
+If making changes to the ARM templates, run the test suite in the ARM Template Testing Toolkit to make sure the templates are valid and unlikely to have issues when being submitted to the Marketplace. See [here]() for more details on the toolkit tests, but to run the tests you will need to have PowerShell installed, and the toolkit downloaded so the relevant modules can be imported into PowerShell:
+
+#### Download Powershell
+
+On MacOS, the simplest way is to install via `brew`:
+
+```shell
+$ brew install --cask powershell
+```
+
+And from here, `pwsh` will fork a new PowerShell process. Rejoice!
+
+>For other platforms, see [here](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.2).
+
+
+#### Download the testing toolkit
+
+The ARM Template Testing Toolkit (ttk) can be downloaded [here](https://aka.ms/arm-ttk-latest). Just download the zip, and unzip somewhere sensible.
+
+More information about the toolkit can be found at https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit
+
+#### Run the tests
+
+Running the tests is straightforward. Ensure you are in the PowerShell (`pwsh` from Bash and friends), and in the `wayfinder-azure/arm-template` directory, then:
+
+```powershell
+# The following imports the testing module into PowerShell
+PS /Path/To/wayfinder-azure/arm-tamplate> Import-Module </Path/To/testing/toolkit>/arm-ttk/arm-ttk.psd1
+# The following runs the testing toolkit tests
+PS /Path/To/wayfinder-azure/arm-tamplate> Test-AzTemplate -TemplatePath .
+```
+
 ### Post Install Steps
 
 After installation you must follow these steps to logon and set a password:
