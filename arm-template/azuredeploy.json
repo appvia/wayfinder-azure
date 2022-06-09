@@ -32,6 +32,10 @@
     "utcValue": {
       "type": "string",
       "defaultValue": "[utcNow()]"
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2_v2"
     }
   },
   "variables": {
@@ -116,7 +120,7 @@
             "count": 3,
             "minCount": 1,
             "maxCount": 10,
-            "vmSize": "Standard_D2_v2",
+            "vmSize": "[parameters('vmSize')]",
             "osType": "Linux",
             "mode": "System",
             "enableAutoScaling": true
@@ -191,11 +195,11 @@
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.PostInstallCommands.firstLogin]"
     },
-    "ChangePassword": {
+    "ChangeLoginCredentials": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.PostInstallCommands.changePassword]"
     },
-    "InitialPassword": {
+    "InitialLoginCredentials": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.User.Password]"
     },
