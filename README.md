@@ -34,6 +34,8 @@ Contributing
 ---
 **We highly appreciate all contributions to Wayfinder** - whether that would be improving our documentation, identifying bugs or even proposing new features. Our [contributing guide](CONTRIBUTING.md) provides instructions on creating issues, pull requests and our contributor code of conduct.
 
+Please also see our guide for [maintainers](MAINTAINERS.md) for information about tooling and testing.
+
 Community
 ---
 Follow us on:
