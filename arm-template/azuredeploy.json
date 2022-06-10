@@ -118,7 +118,7 @@
             "name": "system",
             "osDiskSizeGB": 30,
             "count": 3,
-            "minCount": 1,
+            "minCount": 2,
             "maxCount": 10,
             "vmSize": "[parameters('vmSize')]",
             "osType": "Linux",

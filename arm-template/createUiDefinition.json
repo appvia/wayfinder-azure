@@ -59,7 +59,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Either provide an email address for a new free license or provide a license key",
+                            "text": "Provide a valid email address for a new free license, or provide your own license key",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://www.appvia.io/wayfinder-free"
@@ -75,11 +75,11 @@
                         "constraints": {
                             "allowedValues": [
                                 {
-                                    "label": "Sign up for free license",
+                                    "label": "Yes",
                                     "value": true
                                 },
                                 {
-                                    "label": "Existing License",
+                                    "label": "No",
                                     "value": false
                                 }
                             ],
@@ -126,7 +126,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
-                                    "text": "Wayfinder will not install if the license key is invalid"
+                                    "text": "Wayfinder will not install if the license key is invalid."
                                 }
                             },
                             {
@@ -146,28 +146,62 @@
                 ]
             },
             {
+                "name": "jitConfiguration",
+                "label": "Just-In-Time Access",
+                "subLabel": {
+                    "preValidation": "Configure JIT settings for your application",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "JIT Configuration",
+                "elements": [
+                    {
+                      "name": "jitConfigurationControl",
+                      "type": "Microsoft.Solutions.JitConfigurator",
+                      "label": "JIT Configuration",
+                      "toolTip": "JIT Access enables Appvia Support to request elevated access to your Wayfinder installation for troubleshooting, rather than having full access by default."
+                    }
+                ]
+            },
+            {
                 "name": "acceptLegal",
-                "label": "Agreement",
+                "label": "Legal Agreements",
                 "elements": [
                     {
                         "name": "announcement",
                         "type": "Microsoft.Common.TextBlock",
                         "options": {
-                            "text": "If you are requesting a free license, please review it",
-                            "link": {
-                                "label": "Free License",
-                                "uri": "https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement"
-                            }
+                            "text": "You must review and agree to the relevant Terms and Conditions listed below."
                         }
                     },
                     {
-                        "name": "legalAccept",
+                        "name": "legalAcceptSLA",
                         "type": "Microsoft.Common.CheckBox",
-                        "label": "I agree to the terms and conditions for the license or I do not have a free license.",
-                        "toolTip": "Whether you agree to the required terms and conditions",
+                        "visible": "[equals(steps('license').newFreeLicense, true)]",
+                        "label": "<a href=\"https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Software License Agreement</a>",
+                        "toolTip": "Whether you agree to the required Software License Agreement",
                         "constraints": {
                             "required": true,
-                            "validationMessage": "Please acknowledge the legal conditions."
+                            "validationMessage": "You must accept the Software License Agreement in order to proceed."
+                        }
+                    },
+                    {
+                        "name": "legalAcceptSSAMA",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "<a href=\"https://www.appvia.io/software-support-and-maintenance-agreement?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Software Support and Maintenance Agreement</a>",
+                        "toolTip": "Whether you agree to the required Software Support and Maintenance Agreement",
+                        "constraints": {
+                            "required": true,
+                            "validationMessage": "You must accept the Software Support and Maintenance Agreement in order to proceed."
+                        }
+                    },
+                    {
+                        "name": "legalAcceptSAMTOS",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "<a href=\"https://www.appvia.io/support-and-maintenance-terms-of-service?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Support and Maintenance Terms of Service</a>",
+                        "toolTip": "Whether you agree to the required Support and Maintenance Terms of Service",
+                        "constraints": {
+                            "required": true,
+                            "validationMessage": "You must accept the Support and Maintenance Terms of Service in order to proceed."
                         }
                     }
                 ],
@@ -178,7 +212,8 @@
             "location": "[location()]",
             "clusterName": "[basics('clusterName')]",
             "email": "[steps('license').freeLicense.email]",
-            "license": "[steps('license').existingLicense.key]"
+            "license": "[steps('license').existingLicense.key]",
+            "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
         }
     }
 }
