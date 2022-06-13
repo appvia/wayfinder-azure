@@ -20,10 +20,7 @@ set -o nounset
 set -o pipefail
 ${TRACE:+set -x}
 
-# Dev latest
-#WF_INSTALL_URL="https://storage.googleapis.com/wayfinder-dev-releases/latest/wf-cli-linux-amd64"
-# TODO update to release latest (after 1.3 is released)
-WF_INSTALL_URL=https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64
+WF_INSTALL_URL=${WF_INSTALL_URL:-https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64}
 
 error_exit() {
     echo ${1}
@@ -53,6 +50,8 @@ deploy() {
     --non-interactive \
     --disable-idp \
     --azure-resourcegroup ${RESOURCE_GROUP} \
+    --azure-node-resourcegroup ${NG_RESOURCE_GROUP} \
+    --azure-default-identity ${WF_IDENTITY_NAME} \
     --azure-ingress-ip-name ${IP_NAME} \
     --json-file ${AZ_SCRIPTS_OUTPUT_PATH} \
     ${LICENSE_OPT:-}
@@ -65,6 +64,8 @@ check-envs() {
     REGION \
     CLUSTER_NAME \
     RESOURCE_GROUP \
+    NG_RESOURCE_GROUP \
+    WF_IDENTITY_NAME \
     IP_NAME \
     WF_INSTANCE_ID \
     AZ_SCRIPTS_OUTPUT_PATH \
