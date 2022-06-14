@@ -226,13 +226,13 @@
       "properties": {
         "mode": "Incremental",
         "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
           "resources": [
             {
               "comments": "*** Assign Managed Identity Operator role to AKS' managed identity cross-tenant (for Pod Identity) ***",
               "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2021-04-01-preview",
+              "apiVersion": "2020-10-01-preview",
               "name": "[guid(variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
@@ -244,7 +244,7 @@
             {
               "comments": "*** Assign Virtual Machine Contributer role to AKS' managed identity cross-tenant (for Pod Identity) ***",
               "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2021-04-01-preview",
+              "apiVersion": "2020-10-01-preview",
               "name": "[guid(variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionVirtualMachineContributor'))]",
@@ -256,7 +256,7 @@
             {
               "comments": "*** Assign Managed Identity Operator to the managed resource group ***",
               "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2021-04-01-preview",
+              "apiVersion": "2020-10-01-preview",
               "name": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
@@ -268,7 +268,7 @@
             {
               "comments": "*** Assign Susbscription Reader to the Wayfinder default Identity ***",
               "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2021-04-01-preview",
+              "apiVersion": "2020-10-01-preview",
               "name": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionReader'))]",
