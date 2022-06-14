@@ -39,11 +39,11 @@
     },
     "version": {
       "type": "string",
-      "defaultValue": "latest"
+      "defaultValue": "marketplace-test"
     },
     "releases": {
       "type": "string",
-      "defaultValue": "releases"
+      "defaultValue": "dev-releases"
     }
   },
   "variables": {
@@ -57,10 +57,10 @@
     "dsRoleAssignmentId": "[guid(resourceGroup().id, variables('dsRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', variables('wfInstallIdentity')))]",
     "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
     "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionNetworkContributer'))]",
-    "aksMiRoleAssignmentId": "[guid(variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
-    "aksVmORoleAssignmentId": "[guid(variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
-    "aksMrgRoleAssignmentId": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
-    "wfSubsReaderRoleAssignmentId": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
+    "aksMiRoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
+    "aksVmORoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
+    "aksMrgRoleAssignmentId": "[guid(resourceGroup().id, 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
+    "wfSubsReaderRoleAssignmentId": "[guid(resourceGroup().id, 'subs', variables('roleDefinitionReader'))]",
     "wfInstallIdentity": "wf-installer-identity",
     "wfDefaultIdentityName": "wf-default-identity",
     "wfInstallerDeployment": "wf-installer",
