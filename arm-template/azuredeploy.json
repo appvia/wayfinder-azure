@@ -57,6 +57,10 @@
     "dsRoleAssignmentId": "[guid(resourceGroup().id, variables('dsRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', variables('wfInstallIdentity')))]",
     "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
     "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionNetworkContributer'))]",
+    "aksMiRoleAssignmentId": "[guid(variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
+    "aksVmORoleAssignmentId": "[guid(variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
+    "aksMrgRoleAssignmentId": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
+    "wfSubsReaderRoleAssignmentId": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
     "wfInstallIdentity": "wf-installer-identity",
     "wfDefaultIdentityName": "wf-default-identity",
     "wfInstallerDeployment": "wf-installer",
@@ -233,7 +237,7 @@
               "comments": "*** Assign Managed Identity Operator role to AKS' managed identity cross-tenant (for Pod Identity) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[guid(variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
+              "name": "[variables('aksMiRoleAssignmentId')]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
                 "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
@@ -245,7 +249,7 @@
               "comments": "*** Assign Virtual Machine Contributer role to AKS' managed identity cross-tenant (for Pod Identity) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[guid(variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
+              "name": "[variables('aksVmORoleAssignmentId')]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionVirtualMachineContributor'))]",
                 "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
@@ -257,7 +261,7 @@
               "comments": "*** Assign Managed Identity Operator to the managed resource group ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
+              "name": "[variables('aksMrgRoleAssignmentId')]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
                 "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
@@ -269,7 +273,7 @@
               "comments": "*** Assign Susbscription Reader to the Wayfinder default Identity ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
+              "name": "[variables('wfSubsReaderRoleAssignmentId')]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionReader'))]",
                 "principalId": "[reference(variables('wfDefaultIdentityName')).principalId]",
