@@ -57,8 +57,10 @@
     "dsRoleAssignmentId": "[guid(resourceGroup().id, variables('dsRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', variables('wfInstallIdentity')))]",
     "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
     "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionNetworkContributer'))]",
-    "wfInstallIdentity": "wayfinderInstaller",
-    "wfDefaultIdentityName": "[concat('wf-', parameters('clusterName'),'-identity')]",
+    "wfInstallIdentity": "wf-installer-identity",
+    "wfDefaultIdentityName": "wf-default-identity",
+    "wfInstallerDeployment": "wf-installer",
+    "nodeResourceGroupAccess": "[concat('ra-',guid(resourceGroup().id))]",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]",
@@ -214,7 +216,7 @@
       "comments": "*** Nested cross-resource-group role assignment to the AKS Node Resource Group ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "[concat('ra-',guid(resourceGroup().id))]",
+      "name": "[variables('nodeResourceGroupAccess')]",
       "resourceGroup": "[variables('nodeResourceGroup')]",
       "dependsOn": [
         "[variables('wfDefaultIdentityName')]",
@@ -270,7 +272,7 @@
               "name": "[guid(resourceGroup(), 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionReader'))]",
-                "principalId": "[variables('wfDefaultIdentityName')]",
+                "principalId": "[reference(variables('wfDefaultIdentityName')).principalId]",
                 "principalType": "ServicePrincipal",
                 "scope": "[subscription().id]"
               }
@@ -281,7 +283,8 @@
     },
     {
       "type": "Microsoft.Resources/deploymentScripts",
-      "name": "wayfinder",
+      "comments": "*** Deployment script to run the Wayfinder installer ***",
+      "name": "[variables('wfInstallerDeployment')]",
       "apiVersion": "2020-10-01",
       "location": "[parameters('location')]",
       "kind": "AzureCLI",
@@ -290,7 +293,8 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfDefaultIdentityName'))]",
         "[resourceId('Microsoft.Network/publicIPAddresses', variables('ingressIPName'))]",
         "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]"
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]",
+        "[variables('nodeResourceGroupAccess')]"
       ],
       "identity": {
         "type": "UserAssigned",
@@ -357,19 +361,19 @@
   "outputs": {
     "CreateLoginProfile": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.PostInstallCommands.firstLogin]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.PostInstallCommands.firstLogin]"
     },
     "ChangeLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.PostInstallCommands.changePassword]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.PostInstallCommands.changePassword]"
     },
     "InitialLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.User.Password]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.User.Password]"
     },
     "WayfinderPortalURL": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'wayfinder')).outputs.URLs.UI]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.URLs.UI]"
     }
   }
 }
