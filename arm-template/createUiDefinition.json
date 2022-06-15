@@ -52,14 +52,14 @@
         "steps": [
             {
                 "name": "license",
-                "label": "Select License Type",
+                "label": "Wayfinder License",
                 "elements":[
                     {
                         "name": "announcement",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Provide a valid email address for a new free license, or provide your own license key",
+                            "text": "Provide a valid email address for a new free license.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://www.appvia.io/wayfinder-free"
@@ -67,31 +67,9 @@
                         }
                     },
                     {
-                        "name": "newFreeLicense",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Sign up for a new free license?",
-                        "defaultValue": true,
-                        "toolTip": "Sign up for a new free license (specify no if you have an existing free or other license)",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": true
-                        },
-                        "visible": true
-                    },
-                    {
                         "name": "freeLicense",
                         "label": "Free License",
                         "type": "Microsoft.Common.Section",
-                        "visible": "[equals(steps('license').newFreeLicense, true)]",
                         "elements": [
                             {
                                 "name": "announcement",
@@ -114,34 +92,6 @@
                                 }
                             }
                         ]
-                    },
-                    {
-                        "name": "existingLicense",
-                        "label": "Existing License",
-                        "type": "Microsoft.Common.Section",
-                        "visible": "[equals(steps('license').newFreeLicense, false)]",
-                        "elements": [
-                            {
-                                "name": "announcement",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "text": "Wayfinder will not install if the license key is invalid."
-                                }
-                            },
-                            {
-                                "name": "key",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "License Key",
-                                "defaultValue": "",
-                                "toolTip": "Please enter a valid license Key",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^key\/.{500,700}$",
-                                    "validationMessage": "License Key must be in the correct format. Please re-enter."
-                                }
-                            }
-                        ]
                     }
                 ]
             },
@@ -154,6 +104,14 @@
                 },
                 "bladeTitle": "JIT Configuration",
                 "elements": [
+                    {
+                        "name": "jitConfigurationText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "JIT Access enables the Appvia Support Team to request elevated access to your Wayfinder installation when providing professional support, rather than having full access by default."
+                        }
+                    },
                     {
                       "name": "jitConfigurationControl",
                       "type": "Microsoft.Solutions.JitConfigurator",
@@ -176,7 +134,6 @@
                     {
                         "name": "legalAcceptSLA",
                         "type": "Microsoft.Common.CheckBox",
-                        "visible": "[equals(steps('license').newFreeLicense, true)]",
                         "label": "<a href=\"https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Software License Agreement</a>",
                         "toolTip": "Whether you agree to the required Software License Agreement",
                         "constraints": {
@@ -212,7 +169,6 @@
             "location": "[location()]",
             "clusterName": "[basics('clusterName')]",
             "email": "[steps('license').freeLicense.email]",
-            "license": "[steps('license').existingLicense.key]",
             "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
         }
     }

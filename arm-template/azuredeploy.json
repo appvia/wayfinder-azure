@@ -19,14 +19,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Email address (required to generate a free license if you do not have one)"
-      }
-    },
-    "license": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "A license if you have one already"
+        "description": "Email address (required to generate a new product license)"
       }
     },
     "utcValue": {
@@ -44,6 +37,10 @@
     "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
     "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
     "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+    "rdSubscriptionReaderName": "[guid(subscription().id, 'definition', 'Microsoft.Management/getEntities/action')]",
+    "raSubscriptionReaderName": "[guid(subscription().id, 'assignment', 'Microsoft.Management/getEntities/action')]",
+    "rdManagedIdentityOperatorID": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
+    "raManagedIdentityOperatorName": "[guid(subscription().id, 'assignment', variables('rdManagedIdentityOperatorID'))]",
     "wfInstallIdentity": "wayfinderInstaller",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]"
@@ -65,6 +62,57 @@
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
         "scope": "[resourceGroup().id]",
         "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[variables('rdSubscriptionReaderName')]",
+      "properties": {
+        "roleName": "Custom Role - List Subscriptions & Management Groups",
+        "description": "List subscriptions and management groups",
+        "type": "customRole",
+        "permissions": [
+          {
+            "actions": [
+              "Microsoft.Management/getEntities/action"
+            ]
+          }
+        ],
+        "assignableScopes": [
+          "[resourceGroup().id]"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[variables('raSubscriptionReaderName')]",
+      "comments": "Allows Wayfinder installer access to list Azure Subscriptions",
+      "properties": {
+        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('rdSubscriptionReaderName'))]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal",
+        "scope": "[resourceGroup().id]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]",
+        "[resourceId('Microsoft.Authorization/roleDefinitions', variables('rdSubscriptionReaderName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[variables('raManagedIdentityOperatorName')]",
+      "comments": "Allows wayfinderInstaller managed identity permissions to read itself",
+      "properties": {
+        "roleDefinitionId": "[variables('rdManagedIdentityOperatorID')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
+        "principalType": "ServicePrincipal",
+        "scope": "[resourceGroup().id]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
@@ -138,7 +186,9 @@
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]",
         "[resourceId('Microsoft.Network/publicIPAddresses', variables('ingressIPName'))]",
         "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]"
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('raSubscriptionReaderName'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('raManagedIdentityOperatorName'))]"
       ],
       "identity": {
         "type": "UserAssigned",
@@ -170,10 +220,6 @@
           {
             "name": "WF_EMAIL",
             "value": "[parameters('email')]"
-          },
-          {
-            "name": "WF_LICENSE",
-            "value": "[parameters('license')]"
           },
           {
             "name": "IP_NAME",

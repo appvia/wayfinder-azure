@@ -20,9 +20,7 @@ set -o nounset
 set -o pipefail
 ${TRACE:+set -x}
 
-# Dev latest
-#WF_INSTALL_URL="https://storage.googleapis.com/wayfinder-dev-releases/latest/wf-cli-linux-amd64"
-# TODO update to release latest (after 1.3 is released)
+# Latest official Wayfinder release: https://docs.appvia.io/wayfinder/releases
 WF_INSTALL_URL=https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64
 
 error_exit() {
@@ -55,7 +53,7 @@ deploy() {
     --azure-resourcegroup ${RESOURCE_GROUP} \
     --azure-ingress-ip-name ${IP_NAME} \
     --json-file ${AZ_SCRIPTS_OUTPUT_PATH} \
-    ${LICENSE_OPT:-}
+    --license-email ${WF_EMAIL}
 }
 
 check-envs() {
@@ -68,15 +66,9 @@ check-envs() {
     IP_NAME \
     WF_INSTANCE_ID \
     AZ_SCRIPTS_OUTPUT_PATH \
+    WF_EMAIL \
     ; do check_var ${var:-}
   done
-
-  if [[ -n ${WF_LICENSE:-} ]]; then
-    LICENSE_OPT="--license-key ${WF_LICENSE:-}"
-  else
-    check_var WF_EMAIL
-    LICENSE_OPT="--license-email ${WF_EMAIL}"
-  fi
 }
 
 usage() {
