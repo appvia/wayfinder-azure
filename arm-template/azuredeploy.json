@@ -50,7 +50,7 @@
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
     "roleDefinitionContributer": "b24988ac-6180-42a0-ab88-20f7382dd24c",
     "roleDefinitionNetworkContributer": "4d97b98b-1d4f-4787-a291-c67834d212e7",
-    "roleDefinitionReader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+    //"roleDefinitionReader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
     "roleDefinitionManagedIdentityOperator": "f1a07417-d97a-45cb-824c-7a7467783830",
     "roleDefinitionVirtualMachineContributor": "9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
     "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionContributer'))]",
@@ -60,11 +60,12 @@
     "aksMiRoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
     "aksVmORoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
     "aksMrgRoleAssignmentId": "[guid(resourceGroup().id, 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
-    "wfSubsReaderRoleAssignmentId": "[guid(resourceGroup().id, 'subs', variables('roleDefinitionReader'))]",
+    //"wfSubsReaderRoleAssignmentId": "[guid(resourceGroup().id, 'subs', variables('roleDefinitionReader'))]",
     "wfInstallIdentity": "wf-installer-identity",
     "wfDefaultIdentityName": "wf-default-identity",
     "wfInstallerDeployment": "wf-installer",
     "nodeResourceGroupAccess": "[concat('ra-',guid(resourceGroup().id))]",
+    "mgrResourceGroupAccess": "[concat('mgr-',guid(resourceGroup().id))]",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]",
@@ -87,22 +88,24 @@
       }
     },
     {
+      "comments": "*** An Identity with access to (AKS) and run the Wayfinder installer ***",
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "name": "[variables('wfInstallIdentity')]",
       "apiVersion": "2018-11-30",
       "location": "[parameters('location')]"
     },
     {
+      "comments": "*** A default identity that will be associated with Wayfinder PODs to access Azure API's ***",
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "name": "[variables('wfDefaultIdentityName')]",
       "apiVersion": "2018-11-30",
       "location": "[parameters('location')]"
     },
     {
+      "comments": "*** allows Wayfinder installer contributer access to the resource group ***",
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
       "name": "[variables('dsRoleAssignmentId')]",
-      "comments": "allows Wayfinder installer access to the resource group",
       "properties": {
         "roleDefinitionId": "[variables('dsRoleDefinitionId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
@@ -124,20 +127,6 @@
         "sku": {
             "name": "Standard"
         }
-    },
-    {
-      "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2020-10-01-preview",
-      "name": "[variables('aksRoleAssignmentId')]",
-      "properties": {
-        "roleDefinitionId": "[variables('aksRoleDefinitionId')]",
-        "principalId": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-11-01', 'Full').identity.principalId]",
-        "scope": "[resourceGroup().id]",
-        "principalType": "ServicePrincipal"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
-      ]
     },
     {
       "comments": "*** AKS cluster with custom-named nodeResourceGroup and system assigned managed identity ***",
@@ -217,7 +206,7 @@
       }
     },
     {
-      "comments": "*** Nested cross-resource-group role assignment to the AKS Node Resource Group ***",
+      "comments": "*** Nested cross-resource-group role assignment to the AKS NODE Resource Group ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "[variables('nodeResourceGroupAccess')]",
@@ -234,19 +223,7 @@
           "contentVersion": "1.0.0.0",
           "resources": [
             {
-              "comments": "*** Assign Managed Identity Operator role to AKS' managed identity cross-tenant (for Pod Identity) ***",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-10-01-preview",
-              "name": "[variables('aksMiRoleAssignmentId')]",
-              "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
-                "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
-                "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id,'/resourceGroups/',variables('nodeResourceGroup'))]"
-              }
-            },
-            {
-              "comments": "*** Assign Virtual Machine Contributer role to AKS' managed identity cross-tenant (for Pod Identity) ***",
+              "comments": "*** Assign Virtual Machine Contributer role to AKS' managed identity (for AAD Pod Identity to work) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
               "name": "[variables('aksVmORoleAssignmentId')]",
@@ -258,15 +235,62 @@
               }
             },
             {
-              "comments": "*** Assign Managed Identity Operator to the managed resource group ***",
+              "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the node RG) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[variables('aksMrgRoleAssignmentId')]",
+              "name": "[variables('aksMiRoleAssignmentId')]",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
                 "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name)]"
+                "scope": "[concat(subscription().id,'/resourceGroups/',variables('nodeResourceGroup'))]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comments": "*** Nested cross-resource-group role assignment to the Managed Resource Group ***",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('mgrResourceGroupAccess')]",
+      "dependsOn": [
+        "[variables('wfDefaultIdentityName')]",
+        "[parameters('clusterName')]",
+        "get-aks-mi"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "0.0.0.0",
+          "resources": [
+            {
+              "comments": "*** Assign a suitable role to Wayfinder installer identity to access AKS ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-10-01-preview",
+              "name": "[variables('aksRoleAssignmentId')]",
+              "properties": {
+                "roleDefinitionId": "[variables('aksRoleDefinitionId')]",
+                "principalId": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-11-01', 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+              ]
+            },
+            {
+              "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the Managed RG) ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "name": "[variables('aksMrgRoleAssignmentId')]",
+              "apiVersion": "2020-10-01-preview",
+              "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
+                "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
+                "principalType": "ServicePrincipal",
+                "scope": "[resourceGroup().id]"
               }
             }
           ]
@@ -286,7 +310,8 @@
         "[resourceId('Microsoft.Network/publicIPAddresses', variables('ingressIPName'))]",
         "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]",
         "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]",
-        "[variables('nodeResourceGroupAccess')]"
+        "[variables('nodeResourceGroupAccess')]",
+        "[variables('mgrResourceGroupAccess')]"
       ],
       "identity": {
         "type": "UserAssigned",
