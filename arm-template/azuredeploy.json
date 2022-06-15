@@ -15,13 +15,6 @@
         "description": "The location of the Managed Cluster resource."
       }
     },
-    "email": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Email address (required to generate a free license if you do not have one)"
-      }
-    },
     "license": {
       "type": "string",
       "defaultValue": "",
@@ -46,7 +39,8 @@
     "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
     "wfInstallIdentity": "wayfinderInstaller",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
-    "wfInstanceID": "[uniqueString(resourceGroup().id)]"
+    "wfInstanceID": "[uniqueString(resourceGroup().id)]",
+    "email": "[concat(subscription().subscriptionId, '.', variables('wfInstanceID'), '@appvia.io')]"
   },
   "resources": [
     {
@@ -169,7 +163,7 @@
           },
           {
             "name": "WF_EMAIL",
-            "value": "[parameters('email')]"
+            "value": "[variables('email')]"
           },
           {
             "name": "WF_LICENSE",

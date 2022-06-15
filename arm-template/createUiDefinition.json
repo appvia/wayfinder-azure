@@ -55,23 +55,11 @@
                 "label": "Select License Type",
                 "elements":[
                     {
-                        "name": "announcement",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Provide a valid email address for a new free license, or provide your own license key",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://www.appvia.io/wayfinder-free"
-                            }
-                        }
-                    },
-                    {
-                        "name": "newFreeLicense",
+                        "name": "haveExistingLicense",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Sign up for a new free license?",
+                        "label": "Do you have an existing license to apply to the Wayfinder installation?",
                         "defaultValue": true,
-                        "toolTip": "Sign up for a new free license (specify no if you have an existing free or other license)",
+                        "toolTip": "Select 'yes' if you already have a license, otherwise a new free license will be provisioned",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -88,38 +76,10 @@
                         "visible": true
                     },
                     {
-                        "name": "freeLicense",
-                        "label": "Free License",
-                        "type": "Microsoft.Common.Section",
-                        "visible": "[equals(steps('license').newFreeLicense, true)]",
-                        "elements": [
-                            {
-                                "name": "announcement",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "text": "Wayfinder will not install if the email cannot be used for a license"
-                                }
-                            },
-                            {
-                                "name": "email",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Free License Email",
-                                "defaultValue": "",
-                                "toolTip": "Please enter a valid email account",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$",
-                                    "validationMessage": "Email is not valid. Please re-enter."
-                                }
-                            }
-                        ]
-                    },
-                    {
                         "name": "existingLicense",
                         "label": "Existing License",
                         "type": "Microsoft.Common.Section",
-                        "visible": "[equals(steps('license').newFreeLicense, false)]",
+                        "visible": "[equals(steps('license').haveExistingLicense, true)]",
                         "elements": [
                             {
                                 "name": "announcement",
@@ -139,6 +99,21 @@
                                     "required": true,
                                     "regex": "^key\/.{500,700}$",
                                     "validationMessage": "License Key must be in the correct format. Please re-enter."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "noExistingLicense",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[equals(steps('license').haveExistingLicense, false)]",
+                        "elements": [
+                            {
+                                "name": "announcement",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "A free tier license will be provisioned as part of the installation."
                                 }
                             }
                         ]
@@ -211,7 +186,6 @@
         "outputs": {
             "location": "[location()]",
             "clusterName": "[basics('clusterName')]",
-            "email": "[steps('license').freeLicense.email]",
             "license": "[steps('license').existingLicense.key]",
             "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
         }
