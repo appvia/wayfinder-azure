@@ -266,19 +266,7 @@
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
                 "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id,'/resourceGroups/',resourceGroup().id)]"
-              }
-            },
-            {
-              "comments": "*** Assign Susbscription Reader to the Wayfinder default Identity ***",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-10-01-preview",
-              "name": "[variables('wfSubsReaderRoleAssignmentId')]",
-              "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionReader'))]",
-                "principalId": "[reference(variables('wfDefaultIdentityName')).principalId]",
-                "principalType": "ServicePrincipal",
-                "scope": "[subscription().id]"
+                "scope": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name)]"
               }
             }
           ]
