@@ -50,7 +50,7 @@
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
     "roleDefinitionContributer": "b24988ac-6180-42a0-ab88-20f7382dd24c",
     "roleDefinitionNetworkContributer": "4d97b98b-1d4f-4787-a291-c67834d212e7",
-    //"roleDefinitionReader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+    "roleDefinitionReader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
     "roleDefinitionManagedIdentityOperator": "f1a07417-d97a-45cb-824c-7a7467783830",
     "roleDefinitionVirtualMachineContributor": "9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
     "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionContributer'))]",
@@ -60,7 +60,7 @@
     "aksMiRoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
     "aksVmORoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
     "aksMrgRoleAssignmentId": "[guid(resourceGroup().id, 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
-    //"wfSubsReaderRoleAssignmentId": "[guid(resourceGroup().id, 'subs', variables('roleDefinitionReader'))]",
+    "wfSubsReaderRoleAssignmentId": "[guid(resourceGroup().id, 'subs', variables('roleDefinitionReader'))]",
     "wfInstallIdentity": "wf-installer-identity",
     "wfDefaultIdentityName": "wf-default-identity",
     "wfInstallerDeployment": "wf-installer",
@@ -291,6 +291,38 @@
                 "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
                 "scope": "[resourceGroup().id]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comments": "*** Nested subscription level role assignment (for reading tenant ID from default Wayfinder ID) ***",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('nodeResourceGroupAccess')]",
+      "resourceGroup": "[variables('nodeResourceGroup')]",
+      "dependsOn": [
+        "[variables('wfDefaultIdentityName')]",
+        "[parameters('clusterName')]",
+        "get-aks-mi"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "comments": "*** Assign Subscription reader role to Wayfinder default identity ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "name": "[variables('wfSubsReaderRoleAssignmentId')]",
+              "apiVersion": "2020-10-01-preview",
+              "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfDefaultIdentityName')), '2018-11-30').principalId]",
+                "principalType": "ServicePrincipal"
               }
             }
           ]
