@@ -14,10 +14,6 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   validate:
-    # TODO - will update in separate PR, when we can test some template validation
-    #        actions. For the moment, this is the barebones 'hello world' workflow,
-    #        that will enable us to manually run workflows once it's merged into
-    #        main.
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -25,6 +21,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      # Use the ARM Template Testing Toolkit (ttk) to validate everything
+      # under arm-template/
+      - name: Validate templates
+        id: validate-templates
+        uses: rfernandezdo/arm-ttk@master
+
+        # uses: aliencube/arm-ttk-actions@v0.3
+        # with:
+        #   path: ./arm-template
