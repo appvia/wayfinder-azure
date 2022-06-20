@@ -48,14 +48,14 @@
   },
   "variables": {
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
-    "roleDefinitionContributer": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-    "roleDefinitionNetworkContributer": "4d97b98b-1d4f-4787-a291-c67834d212e7",
+    "roleDefinitionContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+    "roleDefinitionNetworkContributor": "4d97b98b-1d4f-4787-a291-c67834d212e7",
     "roleDefinitionManagedIdentityOperator": "f1a07417-d97a-45cb-824c-7a7467783830",
     "roleDefinitionVirtualMachineContributor": "9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
-    "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionContributer'))]",
+    "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionContributor'))]",
     "dsRoleAssignmentId": "[guid(resourceGroup().id, variables('dsRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', variables('wfInstallIdentity')))]",
     "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
-    "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionNetworkContributer'))]",
+    "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionNetworkContributor'))]",
     "aksMiRoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
     "aksVmORoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
     "aksMrgRoleAssignmentId": "[guid(resourceGroup().id, 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
@@ -99,7 +99,7 @@
       "location": "[parameters('location')]"
     },
     {
-      "comments": "*** allows Wayfinder installer contributer access to the resource group ***",
+      "comments": "*** allows Wayfinder installer Contributor access to the resource group ***",
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
       "name": "[variables('dsRoleAssignmentId')]",
@@ -220,7 +220,7 @@
           "contentVersion": "1.0.0.0",
           "resources": [
             {
-              "comments": "*** Assign Virtual Machine Contributer role to AKS' managed identity (for AAD Pod Identity to work) ***",
+              "comments": "*** Assign Virtual Machine Contributor role to AKS' managed identity (for AAD Pod Identity to work) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
               "name": "[variables('aksVmORoleAssignmentId')]",
