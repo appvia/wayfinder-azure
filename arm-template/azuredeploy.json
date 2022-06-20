@@ -66,7 +66,7 @@
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]",
-    "wfDownloadURL": "[concat('https://storage.googleapis.com/', 'wayfinder-', parameters('releases'), '/', parameters('version'), '/wf-cli-linux-amd64')]"
+    "wfDownloadURL": "[uri('https://', concat('storage.googleapis.com/', 'wayfinder-', parameters('releases'), '/', parameters('version'), '/wf-cli-linux-amd64'))]"
   },
   "resources": [
     {
