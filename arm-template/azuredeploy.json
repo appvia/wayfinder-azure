@@ -79,8 +79,7 @@
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
-          "resources": [
-          ]
+          "resources": []
         }
       }
     },
@@ -107,23 +106,24 @@
         "roleDefinitionId": "[variables('dsRoleDefinitionId')]",
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
         "scope": "[resourceGroup().id]",
-        "principalType": "ServicePrincipal"
+        "principalType": "ServicePrincipal",
+        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
       ]
     },
     {
-        "type": "Microsoft.Network/publicIPAddresses",
-        "apiVersion": "2020-11-01",
-        "location": "[parameters('location')]",
-        "name": "[variables('ingressIPName')]",
-        "properties": {
-            "publicIPAllocationMethod": "Static"
-        },
-        "sku": {
-            "name": "Standard"
-        }
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-11-01",
+      "location": "[parameters('location')]",
+      "name": "[variables('ingressIPName')]",
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      },
+      "sku": {
+        "name": "Standard"
+      }
     },
     {
       "comments": "*** AKS cluster with custom-named nodeResourceGroup and system assigned managed identity ***",
@@ -140,9 +140,9 @@
         "enableRBAC": true,
         "kubernetesVersion": "1.22.6",
         "networkProfile": {
-            "networkPlugin": "azure",
-            "networkPolicy": "calico",
-            "loadBalancerSku": "standard"
+          "networkPlugin": "azure",
+          "networkPolicy": "calico",
+          "loadBalancerSku": "standard"
         },
         "agentPoolProfiles": [
           {
