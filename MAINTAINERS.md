@@ -7,6 +7,23 @@ The marketplace configuration uses Azure's ARM (Azure Resource Manager) template
 
 If using VS Code, it's recommended to install the [Azure Resource Manager Tools](https://marketplace.visualstudio.com/items?itemName=msazurermtools.azurerm-vscode-tools) extension, which provides a language server, schema validation, snippets and other goodies to help write ARM templates.
 
+## `run.sh`
+`scripts/run.sh` contains general-purpose utilities for handling UI definitions and packing assets up into a format for Marketplace submission.
+
+You can run the script directly from the `scripts/` folder.
+
+It currently has the following tasks:
+
+| Task | Description |
+| --- | --- |
+| `generate_full_ui` | Generates a `createUiDefinition.json` with a complete Marketplace UI. |
+`generate_no_license_ui` | Generates a `createUiDefinition.json` without any licensing step. |
+| `package` | Stubbed out for the moment, but will take care of packaging all assets up into a zip for submission to Azure. |
+
+`run.sh help` displays a list of all functions in the script - it's not a full substitute for proper flag/commanf output, sorry!
+
+>`CreateUiDefinition.json` is no longer stored under `arm-template/` - the core (complete) version is now under `arm-template/assets/`. You must run one of the `generate` tasks in the `run.sh` script to create an appropriate UI definition before packaging!
+
 ## Validating Template changes
 
 If making changes to the ARM templates, run the test suite in the ARM Template Testing Toolkit to make sure the templates are valid and unlikely to have issues when being submitted to the Marketplace. See [here]() for more details on the toolkit tests, but to run the tests you will need to have PowerShell installed, and the toolkit downloaded so the relevant modules can be imported into PowerShell:
