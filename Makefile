@@ -24,8 +24,8 @@ strip-license:
 	jq \
 		'del(.parameters.email) | \
 		del(.parameters.license) | \
-		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_EMAIL")) | \
-		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE"))' \
+		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE_EMAIL")) | \
+		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE_KEY"))' \
 		${TEMPLATE_DIR}/azuredeploy.json > ${BUILD_DIR}/azuredeploy.json
 
 create-appvia-package: create-build-dir copy-to-build-dir strip-license
@@ -47,7 +47,9 @@ create-external-package: create-build-dir copy-to-build-dir strip-license
 		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
-	$(MAKE) package
+	@$(MAKE) package
 
 package:
+	@echo "--> Packaging contents"
 	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json scripts/wayfinder.sh
+	@echo "--> Package file is located at: ${BUILD_DIR}/app.zip"

@@ -333,11 +333,11 @@
             "value": "[variables('managedIdentityWF')]"
           },
           {
-            "name": "WF_EMAIL",
+            "name": "WF_LICENSE_EMAIL",
             "value": "[parameters('email')]"
           },
           {
-            "name": "WF_LICENSE",
+            "name": "WF_LICENSE_KEY",
             "value": "[parameters('license')]"
           },
           {
