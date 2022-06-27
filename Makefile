@@ -28,7 +28,7 @@ strip-license:
 		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE_KEY"))' \
 		${TEMPLATE_DIR}/azuredeploy.json > ${BUILD_DIR}/azuredeploy.json
 
-create-appvia-package: create-build-dir copy-to-build-dir strip-license
+create-appvia-package: create-build-dir copy-to-build-dir
 	@echo "--> Creating a package for internal testing within an Appvia Tenant"
 	jq \
 		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
@@ -39,7 +39,7 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 
 	$(MAKE) package
 
-create-external-package: create-build-dir copy-to-build-dir strip-license
+create-external-package: create-build-dir copy-to-build-dir
 	@echo "--> Creating a package for external tenants"
 	jq \
 		'.parameters.version.defaultValue = "${WF_VERSION}" | \
