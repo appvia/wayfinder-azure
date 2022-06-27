@@ -48,21 +48,20 @@
   },
   "variables": {
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
-    "roleDefinitionContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-    "roleDefinitionNetworkContributor": "4d97b98b-1d4f-4787-a291-c67834d212e7",
-    "roleDefinitionManagedIdentityOperator": "f1a07417-d97a-45cb-824c-7a7467783830",
-    "roleDefinitionVirtualMachineContributor": "9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
-    "dsRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionContributor'))]",
-    "dsRoleAssignmentId": "[guid(resourceGroup().id, variables('dsRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', variables('wfInstallIdentity')))]",
-    "aksRoleAssignmentId": "[guid(resourceGroup().id, variables('aksRoleDefinitionId'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
-    "aksRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionNetworkContributor'))]",
-    "aksMiRoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksmi', variables('roleDefinitionManagedIdentityOperator'))]",
-    "aksVmORoleAssignmentId": "[guid(resourceGroup().id, variables('nodeResourceGroup'), 'aksvmo', variables('roleDefinitionVirtualMachineContributor'))]",
-    "aksMrgRoleAssignmentId": "[guid(resourceGroup().id, 'mrg', variables('roleDefinitionManagedIdentityOperator'))]",
-    "wfInstallIdentity": "wf-installer-identity",
-    "wfDefaultIdentityName": "wf-default-identity",
-    "wfInstallerDeployment": "wf-installer",
-    "nodeResourceGroupAccess": "[concat('ra-',guid(resourceGroup().id))]",
+    "roleDefinitionContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+    "roleDefinitionNetworkContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+    "roleDefinitionManagedIdentityOperator": "[resourceId('Microsoft.Authorization/roleDefinitions', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
+    "roleDefinitionVirtualMachineContributor": "[resourceId('Microsoft.Authorization/roleDefinitions', '9980e02c-c2be-4d73-94e8-173b1dc7cf3c')]",
+    "roleAssignmentContributorWFInstaller": "[guid(resourceGroup().id, variables('roleDefinitionContributor'), resourceId('Microsoft.ManagedIdentity/identities', variables('managedIdentityWFInstaller')))]",
+    "roleAssignmentNetworkContributorAKS": "[guid(resourceGroup().id, variables('roleDefinitionNetworkContributor'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
+    "roleAssignmentNRGManagedIdentityOperatorAKSMI": "[guid(variables('nodeResourceGroup'), variables('roleDefinitionManagedIdentityOperator'), 'aksmi')]",
+    "roleAssignmentManagedIdentityOperatorAKSMI": "[guid(resourceGroup().id, variables('roleDefinitionManagedIdentityOperator'), 'aksmi')]",
+    "roleAssignmentNRGVirtualMachineContributorAKSVMO": "[guid(variables('nodeResourceGroup'), variables('roleDefinitionVirtualMachineContributor'), 'aksvmo')]",
+    "managedIdentityWFInstaller": "wayfinder-installer",
+    "managedIdentityWF": "wayfinder-default",
+    "deploymentWFInstaller": "wayfinder-installer",
+    "deploymentGetAKSMI": "wayfinder-get-aks-mi",
+    "deploymentNRGAccess": "wayfinder-node-resource-group-access",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]",
@@ -86,14 +85,14 @@
     {
       "comments": "*** An Identity with access to (AKS) and run the Wayfinder installer ***",
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "name": "[variables('wfInstallIdentity')]",
+      "name": "[variables('managedIdentityWFInstaller')]",
       "apiVersion": "2018-11-30",
       "location": "[parameters('location')]"
     },
     {
       "comments": "*** A default identity that will be associated with Wayfinder PODs to access Azure API's ***",
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "name": "[variables('wfDefaultIdentityName')]",
+      "name": "[variables('managedIdentityWF')]",
       "apiVersion": "2018-11-30",
       "location": "[parameters('location')]"
     },
@@ -101,16 +100,16 @@
       "comments": "*** allows Wayfinder installer Contributor access to the resource group ***",
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[variables('dsRoleAssignmentId')]",
+      "name": "[variables('roleAssignmentContributorWFInstaller')]",
       "properties": {
-        "roleDefinitionId": "[variables('dsRoleDefinitionId')]",
-        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity')), '2018-11-30').principalId]",
+        "roleDefinitionId": "[variables('roleDefinitionContributor')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller')), '2018-11-30').principalId]",
         "scope": "[resourceGroup().id]",
         "principalType": "ServicePrincipal",
-        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
       ]
     },
     {
@@ -163,7 +162,7 @@
       "comments": "*** After AKS cluster gets deployed, use inner-scope nested template to get AKS managed identity resourceId and principalId ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "get-aks-mi",
+      "name": "[variables('deploymentGetAKSMI')]",
       "resourceGroup": "[variables('nodeResourceGroup')]",
       "dependsOn": [
         "[parameters('clusterName')]"
@@ -206,12 +205,12 @@
       "comments": "*** Nested cross-resource-group role assignment to the AKS NODE Resource Group ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "[variables('nodeResourceGroupAccess')]",
+      "name": "[variables('deploymentNRGAccess')]",
       "resourceGroup": "[variables('nodeResourceGroup')]",
       "dependsOn": [
-        "[variables('wfDefaultIdentityName')]",
+        "[variables('managedIdentityWF')]",
         "[parameters('clusterName')]",
-        "get-aks-mi"
+        "[variables('deploymentGetAKSMI')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -223,24 +222,26 @@
               "comments": "*** Assign Virtual Machine Contributor role to AKS' managed identity (for AAD Pod Identity to work) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[variables('aksVmORoleAssignmentId')]",
+              "name": "[variables('roleAssignmentNRGVirtualMachineContributorAKSVMO')]",
               "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionVirtualMachineContributor'))]",
-                "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
+                "roleDefinitionId": "[variables('roleDefinitionVirtualMachineContributor')]",
+                "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id,'/resourceGroups/',variables('nodeResourceGroup'))]"
+                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
+                "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
               }
             },
             {
               "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the node RG) ***",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
-              "name": "[variables('aksMiRoleAssignmentId')]",
+              "name": "[variables('roleAssignmentNRGManagedIdentityOperatorAKSMI')]",
               "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
-                "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
+                "roleDefinitionId": "[variables('roleDefinitionManagedIdentityOperator')]",
+                "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id,'/resourceGroups/',variables('nodeResourceGroup'))]"
+                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
+                "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
               }
             }
           ]
@@ -251,53 +252,55 @@
       "comments": "*** Assign a suitable role to AKS identity ***",
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-10-01-preview",
-      "name": "[variables('aksRoleAssignmentId')]",
+      "name": "[variables('roleAssignmentNetworkContributorAKS')]",
       "properties": {
-        "roleDefinitionId": "[variables('aksRoleDefinitionId')]",
+        "roleDefinitionId": "[variables('roleDefinitionNetworkContributor')]",
         "principalId": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-11-01', 'Full').identity.principalId]",
         "scope": "[resourceGroup().id]",
-        "principalType": "ServicePrincipal"
+        "principalType": "ServicePrincipal",
+        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
       ]
     },
     {
-      "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the Managed RG) ***",
+      "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities referring to MIs in the Managed RG) ***",
       "type": "Microsoft.Authorization/roleAssignments",
-      "name": "[variables('aksMrgRoleAssignmentId')]",
+      "name": "[variables('roleAssignmentManagedIdentityOperatorAKSMI')]",
       "apiVersion": "2020-10-01-preview",
       "properties": {
-        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions',variables('roleDefinitionManagedIdentityOperator'))]",
-        "principalId": "[reference('get-aks-mi','2019-10-01').outputs.aksMiPrincipalId.value]",
+        "roleDefinitionId": "[variables('roleDefinitionManagedIdentityOperator')]",
+        "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
         "principalType": "ServicePrincipal",
-        "scope": "[resourceGroup().id]"
+        "scope": "[resourceGroup().id]",
+        "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
       },
       "dependsOn": [
-        "get-aks-mi"
+        "[variables('deploymentGetAKSMI')]"
       ]
     },
     {
       "type": "Microsoft.Resources/deploymentScripts",
       "comments": "*** Deployment script to run the Wayfinder installer ***",
-      "name": "[variables('wfInstallerDeployment')]",
+      "name": "[variables('deploymentWFInstaller')]",
       "apiVersion": "2020-10-01",
       "location": "[parameters('location')]",
       "kind": "AzureCLI",
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfDefaultIdentityName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]",
         "[resourceId('Microsoft.Network/publicIPAddresses', variables('ingressIPName'))]",
         "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments',variables('dsRoleAssignmentId'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments',variables('aksRoleAssignmentId'))]",
-        "[resourceId('Microsoft.Authorization/roleAssignments',variables('aksMrgRoleAssignmentId'))]",
-        "[variables('nodeResourceGroupAccess')]"
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('roleAssignmentContributorWFInstaller'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('roleAssignmentNetworkContributorAKS'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments',variables('roleAssignmentManagedIdentityOperatorAKSMI'))]",
+        "[variables('deploymentNRGAccess')]"
       ],
       "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities', variables('wfInstallIdentity'))]": {}
+          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]": {}
         }
       },
       "properties": {
@@ -327,14 +330,14 @@
           },
           {
             "name": "WF_IDENTITY_NAME",
-            "value": "[variables('wfDefaultIdentityName')]"
+            "value": "[variables('managedIdentityWF')]"
           },
           {
-            "name": "WF_EMAIL",
+            "name": "WF_LICENSE_EMAIL",
             "value": "[parameters('email')]"
           },
           {
-            "name": "WF_LICENSE",
+            "name": "WF_LICENSE_KEY",
             "value": "[parameters('license')]"
           },
           {
@@ -359,19 +362,19 @@
   "outputs": {
     "CreateLoginProfile": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.PostInstallCommands.firstLogin]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.PostInstallCommands.firstLogin]"
     },
     "ChangeLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.PostInstallCommands.changePassword]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.PostInstallCommands.changePassword]"
     },
     "InitialLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.User.Password]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.User.Password]"
     },
     "WayfinderPortalURL": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('wfInstallerDeployment'))).outputs.URLs.UI]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.URLs.UI]"
     }
   }
 }

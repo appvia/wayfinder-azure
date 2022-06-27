@@ -35,7 +35,7 @@ check_var() {
 }
 
 download() {
-  curl -L ${WF_INSTALL_URL} --output /tmp/wf
+  curl -sSL ${WF_INSTALL_URL} --output /tmp/wf
   chmod +x /tmp/wf
   mv /tmp/wf /usr/local/bin/wf
 }
@@ -72,11 +72,10 @@ check-envs() {
     ; do check_var ${var:-}
   done
 
-  if [[ -n ${WF_LICENSE:-} ]]; then
-    LICENSE_OPT="--license-key ${WF_LICENSE:-}"
-  else
-    check_var WF_EMAIL
-    LICENSE_OPT="--license-email ${WF_EMAIL}"
+  if [[ -n ${WF_LICENSE_KEY:-} ]]; then
+    LICENSE_OPT="--license-key ${WF_LICENSE_KEY}"
+  elif [[ -n ${WF_LICENSE_EMAIL:-} ]]; then
+    LICENSE_OPT="--license-email ${WF_LICENSE_EMAIL}"
   fi
 }
 
