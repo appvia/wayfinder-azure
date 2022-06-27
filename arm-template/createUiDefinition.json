@@ -176,7 +176,6 @@
                     {
                         "name": "legalAcceptSLA",
                         "type": "Microsoft.Common.CheckBox",
-                        "visible": "[equals(steps('license').newFreeLicense, true)]",
                         "label": "<a href=\"https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Software License Agreement</a>",
                         "toolTip": "Whether you agree to the required Software License Agreement",
                         "constraints": {

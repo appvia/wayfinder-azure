@@ -14,7 +14,21 @@ copy-to-build-dir:
 	cp -R ${TEMPLATE_DIR}/ ${BUILD_DIR}/
 	rm -f ${BUILD_DIR}/mainTemplate.json ${BUILD_DIR}/*.zip
 
-create-appvia-package: create-build-dir copy-to-build-dir
+strip-license:
+	@echo "--> Stripping License step from UI definition"
+	jq \
+		'del(.parameters.steps[] | select(.name == "license")) | \
+		del(.parameters.outputs.email) | \
+		del(.parameters.outputs.license)' \
+		${TEMPLATE_DIR}/createUiDefinition.json > ${BUILD_DIR}/createUiDefinition.json
+	jq \
+		'del(.parameters.email) | \
+		del(.parameters.license) | \
+		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_EMAIL")) | \
+		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE"))' \
+		${TEMPLATE_DIR}/azuredeploy.json > ${BUILD_DIR}/azuredeploy.json
+
+create-appvia-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for internal testing within an Appvia Tenant"
 	jq \
 		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
@@ -23,10 +37,9 @@ create-appvia-package: create-build-dir copy-to-build-dir
 		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
-	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json scripts/wayfinder.sh
-	@echo "--> Package file is located at: ${BUILD_DIR}/app.zip"
+	$(MAKE) package
 
-create-external-package: create-build-dir copy-to-build-dir
+create-external-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
 		'.parameters.version.defaultValue = "${WF_VERSION}" | \
@@ -34,5 +47,7 @@ create-external-package: create-build-dir copy-to-build-dir
 		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
+	$(MAKE) package
+
+package:
 	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json scripts/wayfinder.sh
-	@echo "--> Package file is located at: ${BUILD_DIR}/app.zip"
