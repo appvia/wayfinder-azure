@@ -2,7 +2,6 @@
 *.orig
 .idea
 .vscode
-.build
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,vim,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=go,vim,visualstudiocode
@@ -32,3 +31,8 @@ Sessionx.vim
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/go,vim,visualstudiocode
+
+# Build and Test files
+.build
+scriptoutputs.json
+wf-parameters.env
