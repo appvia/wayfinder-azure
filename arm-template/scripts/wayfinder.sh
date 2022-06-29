@@ -20,7 +20,9 @@ set -o nounset
 set -o pipefail
 ${TRACE:+set -x}
 
+# Set defaults
 WF_INSTALL_URL=${WF_INSTALL_URL:-https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64}
+AZ_SCRIPTS_OUTPUT_PATH=${AZ_SCRIPTS_OUTPUT_PATH:-"./scriptoutputs.json"}
 
 error_exit() {
     echo ${1}
@@ -35,9 +37,11 @@ check_var() {
 }
 
 download() {
+  echo "Downloading Wayfinder Release: ${WF_INSTALL_URL}"
   curl -sSL ${WF_INSTALL_URL} --output /tmp/wf
   chmod +x /tmp/wf
   mv /tmp/wf /usr/local/bin/wf
+  echo "Wayfinder Version => $(wf version)"
 }
 
 deploy() {
@@ -68,7 +72,6 @@ check-envs() {
     WF_IDENTITY_NAME \
     IP_NAME \
     WF_INSTANCE_ID \
-    AZ_SCRIPTS_OUTPUT_PATH \
     ; do check_var ${var:-}
   done
 
