@@ -60,6 +60,8 @@
     "managedIdentityWFInstaller": "wayfinder-installer",
     "managedIdentityWF": "wayfinder-default",
     "deploymentWFInstaller": "wayfinder-installer",
+    "wfPlanID": "wayfinder-standard",
+    "wfDimension": "vcpu",
     "deploymentGetAKSMI": "wayfinder-get-aks-mi",
     "deploymentNRGAccess": "wayfinder-node-resource-group-access",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
@@ -319,6 +321,14 @@
           {
             "name": "CLUSTER_NAME",
             "value": "[parameters('clusterName')]"
+          },
+          {
+            "name": "WF_PLAN_ID",
+            "value": "[variables('wfPlanID')]"
+          },
+          {
+            "name": "WF_DIMENSION",
+            "value": "[variables('wfDimension')]"
           },
           {
             "name": "RESOURCE_GROUP",
