@@ -2,6 +2,7 @@ BUILD_DIR=.build
 TEMPLATE_DIR=arm-template
 WF_VERSION ?= latest
 WF_RELEASE_CHANNEL ?= releases
+WF_PLAN_ID ?= wayfinder-standard
 TRACKING_ID ?= pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter
 
 create-build-dir:
@@ -34,6 +35,7 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
+		.variables.wfPlanID = "${WF_PLAN_ID}" | \
 		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
@@ -44,6 +46,7 @@ create-external-package: create-build-dir copy-to-build-dir strip-license
 	jq \
 		'.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
+		.variables.wfPlanID = "${WF_PLAN_ID}" | \
 		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
