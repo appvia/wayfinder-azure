@@ -48,10 +48,13 @@
   },
   "variables": {
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
+    "roleDefinitionReader": "[subscriptionResourceId('Microsoft.Authorization/roleAssignments', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
     "roleDefinitionContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
     "roleDefinitionNetworkContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
     "roleDefinitionManagedIdentityOperator": "[resourceId('Microsoft.Authorization/roleDefinitions', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
     "roleDefinitionVirtualMachineContributor": "[resourceId('Microsoft.Authorization/roleDefinitions', '9980e02c-c2be-4d73-94e8-173b1dc7cf3c')]",
+    "roleAssignmentNRGReaderWFDefaultIdentity": "[guid(resourceGroup().id, variables('roleDefinitionReader'), resourceId('Microsoft.ManagedIdentity/identities', variables('managedIdentityWF')), 'NRG')]",
+    "roleAssignmentMRGReaderWFDefaultIdentity": "[guid(resourceGroup().id, variables('roleDefinitionReader'), resourceId('Microsoft.ManagedIdentity/identities', variables('managedIdentityWF')), 'MRG')]",
     "roleAssignmentContributorWFInstaller": "[guid(resourceGroup().id, variables('roleDefinitionContributor'), resourceId('Microsoft.ManagedIdentity/identities', variables('managedIdentityWFInstaller')))]",
     "roleAssignmentNetworkContributorAKS": "[guid(resourceGroup().id, variables('roleDefinitionNetworkContributor'), resourceId('Microsoft.ManagedIdentity/identities', 'aks'))]",
     "roleAssignmentNRGManagedIdentityOperatorAKSMI": "[guid(variables('nodeResourceGroup'), variables('roleDefinitionManagedIdentityOperator'), 'aksmi')]",
@@ -110,6 +113,22 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
+      ]
+    },
+    {
+      "comments": "*** allows Wayfinder default identity Read access to the resource group ***",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-10-01-preview",
+      "name": "[variables('roleAssignmentMRGReaderWFDefaultIdentity')]",
+      "properties": {
+        "roleDefinitionId": "[variables('roleDefinitionReader')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), '2018-11-30').principalId]",
+        "scope": "[resourceGroup().id]",
+        "principalType": "ServicePrincipal",
+        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]"
       ]
     },
     {
@@ -242,6 +261,19 @@
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
                 "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
+              }
+            },
+            {
+              "comments": "*** Assign read role to Wayfinder managed identity (to allow audit of managedBy property of resource group) ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-10-01-preview",
+              "name": "[variables('roleAssignmentNRGReaderWFDefaultIdentity')]",
+              "properties": {
+                "roleDefinitionId": "[variables('roleDefinitionReader')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), '2018-11-30').principalId]",
+                "principalType": "ServicePrincipal",
+                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
+                "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]"
               }
             }
           ]
