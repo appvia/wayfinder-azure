@@ -21,13 +21,17 @@ ${TRACE:+set -x}
 # Get script current directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Default variables
+# Variables
 PARAMETERS_FILE="${SCRIPT_DIR}/parameters.json"
 DEFAULT_RELEASE_VERSION="main"
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
 FLAG_SUBSCRIPTION=""
 FLAG_RESOURCE_GROUP=""
 FLAG_NAME="${DEFAULT_APP_NAME}"
 FLAG_RELEASE="${DEFAULT_RELEASE_VERSION}"
+MANAGED_RESOURCE_GROUP=""
+PARAMETERS_MANAGEDAPP=""
+PARAMETERS_CONFIGSTORE=""
 
 # Help instructions for this script.
 print_usage() {
@@ -43,6 +47,7 @@ Flags:
 
 # Check that all required arguments have been supplied.
 check_required_arguments() {
+    echo "--> Checking if required flags have been provided."
     for var in "FLAG_SUBSCRIPTION" "FLAG_RESOURCE_GROUP" "FLAG_NAME" "FLAG_RELEASE"; do
         if [ -z "${!var}" ]; then
             echo "Error: Variable ${var} has no value."
@@ -53,35 +58,54 @@ check_required_arguments() {
 }
 
 # Fetch parameters originally provided to the Managed Application at time of installation.
-# TODO: For future-proofing, we should implement a parameter store and fetch parameters from that.
-#       The Managed Application parameters are fixed at time of installation, so the parameter store
-#       can be used to keep track of any new additions and supply it to the ARM template
-fetch_parameters() {
-    parameters=$(az managedapp show --subscription ${FLAG_SUBSCRIPTION} -g ${FLAG_RESOURCE_GROUP} -n ${FLAG_NAME} --query parameters)
+fetch_parameters_managedapp() {
+    echo "--> Fetching parameters that were provided at install time to the Managed Application '${FLAG_NAME}'."
+    PARAMETERS_MANAGEDAPP=$(az managedapp show --subscription ${FLAG_SUBSCRIPTION} -g ${FLAG_RESOURCE_GROUP} -n ${FLAG_NAME} --query parameters)
+}
 
-    # Remove the type key and generate a json file with the parameters
-    echo $parameters | jq 'walk(if type == "object" then with_entries(select(.key | test("type") | not)) else . end)' > ${PARAMETERS_FILE}
+# Fetch parameters within an Application Config Store
+fetch_parameters_configstore() {
+    echo "--> Retrieving parameters within the Configuration Store '${MANAGED_RESOURCE_GROUP}'."
+    local parameters=$(az appconfig kv list --subscription ${FLAG_SUBSCRIPTION} -n ${MANAGED_RESOURCE_GROUP})
+    PARAMETERS_CONFIGSTORE=$(echo ${parameters} | jq '.[] | {(.key) : {value: .value}}' | jq -cs add)
 }
 
 # Fetch the name of the Managed Resource Group where the Wayfinder resources reside.
 fetch_mrg_name() {
-    az managedapp show --subscription ${FLAG_SUBSCRIPTION} -g ${FLAG_RESOURCE_GROUP} -n ${FLAG_NAME} -o tsv --query managedResourceGroupId | sed 's/.*\///'
+    echo "--> Retrieving the Managed Resource Group associated with the Managed Application '${FLAG_NAME}'."
+    MANAGED_RESOURCE_GROUP=$(az managedapp show --subscription ${FLAG_SUBSCRIPTION} -g ${FLAG_RESOURCE_GROUP} -n ${FLAG_NAME} -o tsv --query managedResourceGroupId | sed 's/.*\///')
+}
+
+# Create an Application Config Store containing Parameters for the Wayfinder ARM Template
+create_configstore() {
+    if ! az appconfig show --subscription ${FLAG_SUBSCRIPTION} -g ${MANAGED_RESOURCE_GROUP} -n ${MANAGED_RESOURCE_GROUP} &>/dev/null; then
+        echo "--> Configuration Store for Managed Application '${FLAG_NAME}' does not exist, creating one now."
+
+        fetch_parameters_managedapp
+        local keys=$(echo ${PARAMETERS_MANAGEDAPP} | jq -c 'keys')
+        local values=$(echo ${PARAMETERS_MANAGEDAPP} | jq -c '[.[].value]')
+
+        az deployment group create --name wf-configStore-${TIMESTAMP}-${FLAG_RELEASE} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/configStore.json --parameters configStoreName=${MANAGED_RESOURCE_GROUP} keyValueNames=${keys} keyValueValues=${values}
+    else
+        echo "--> Configuration Store '${MANAGED_RESOURCE_GROUP}' already exists, skipping creation."
+    fi
 }
 
 # Perform an upgrade of the Managed Application by redeploying the ARM Template at a specified version.
 upgrade() {
-    timestamp=$(date +%Y%m%d-%H%M%S)
-    az deployment group create --name wf-upgrade-${timestamp}-${FLAG_RELEASE} --resource-group ${1} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/azuredeploy.json --parameters @${PARAMETERS_FILE}
+    local deployment_name="wf-upgrade-${TIMESTAMP}-${FLAG_RELEASE}"
+    echo "--> Performing an upgrade of Wayfinder, deployment name is '${deployment_name}'."
+    az deployment group create --name ${deployment_name} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/azuredeploy.json --parameters ${PARAMETERS_CONFIGSTORE}
 }
 
 # The main function
 main() {
     check_required_arguments
-    fetch_parameters
-    mrg=$(fetch_mrg_name)
-    upgrade $mrg
+    fetch_mrg_name
+    create_configstore
+    fetch_parameters_configstore
+    upgrade
 }
-
 
 # Parse arguments provided to the script and error if any are unexpected
 while getopts 's:g:n:r:h' flag; do
