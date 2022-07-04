@@ -2,13 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "partnerId": {
-      "type": "string",
-      "defaultValue": "pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter",
-      "metadata": {
-        "description": "The Azure Marketplace usage attribution tracking GUID"
-      }
-    },
     "wfPlanId": {
       "type": "string",
       "defaultValue": "wayfinder-standard",
@@ -91,7 +84,7 @@
       "comments": "*** Azure Marketplace required usage attribution tracking GUID ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "[parameters('partnerId')]",
+      "name": "pid-188392e6-9687-4e00-8c58-904709546b4a",
       "properties": {
         "mode": "Incremental",
         "template": {

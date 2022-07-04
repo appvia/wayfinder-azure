@@ -3,7 +3,7 @@ TEMPLATE_DIR=arm-template
 WF_VERSION ?= latest
 WF_RELEASE_CHANNEL ?= releases
 WF_PLAN_ID ?= wayfinder-standard
-TRACKING_ID ?= pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter
+TRACKING_ID ?= pid-3b0884cf-abb0-46cf-a48b-55ee7245e8a9-partnercenter
 
 create-build-dir:
 	@echo "--> Creating build directory"
@@ -27,10 +27,10 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for internal testing within an Appvia Tenant"
 	jq \
 		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
-		.parameters.partnerId.defaultValue = "${TRACKING_ID}" | \
 		.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
-		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}"' \
+		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
+		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	$(MAKE) package
@@ -38,10 +38,10 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 create-external-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
-		'.parameters.partnerId.defaultValue = "${TRACKING_ID}" | \
-		.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
+		'.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
-		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}"' \
+		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
+		.resources[0].name = "${TRACKING_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	@$(MAKE) package
