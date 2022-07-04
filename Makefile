@@ -33,10 +33,10 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for internal testing within an Appvia Tenant"
 	jq \
 		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
+		.parameters.partnerId.defaultValue = "${TRACKING_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
-		.variables.wfPlanID = "${WF_PLAN_ID}" | \
-		.resources[0].name = "${TRACKING_ID}"' \
+		.variables.wfPlanID = "${WF_PLAN_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	$(MAKE) package
@@ -44,10 +44,10 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 create-external-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
-		'.parameters.version.defaultValue = "${WF_VERSION}" | \
+		'.parameters.partnerId.defaultValue = "${TRACKING_ID}" | \
+		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
-		.variables.wfPlanID = "${WF_PLAN_ID}" | \
-		.resources[0].name = "${TRACKING_ID}"' \
+		.variables.wfPlanID = "${WF_PLAN_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	@$(MAKE) package

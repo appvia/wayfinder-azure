@@ -2,8 +2,16 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "partnerId": {
+      "type": "string",
+      "defaultValue": "pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter",
+      "metadata": {
+        "description": "The Azure Marketplace usage attribution tracking GUID"
+      }
+    },
     "clusterName": {
       "type": "string",
+      "defaultValue": "wayfinder",
       "metadata": {
         "description": "The name of the Wayfinder management cluster."
       }
@@ -77,7 +85,7 @@
       "comments": "*** Azure Marketplace required usage attribution tracking GUID ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter",
+      "name": "[parameters('partnerId')]",
       "properties": {
         "mode": "Incremental",
         "template": {
