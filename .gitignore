@@ -36,3 +36,4 @@ Sessionx.vim
 .build
 .env
 parameters.json
+scriptoutputs.json

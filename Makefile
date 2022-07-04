@@ -22,12 +22,6 @@ strip-license:
 		del(.parameters.outputs.email) | \
 		del(.parameters.outputs.license)' \
 		${TEMPLATE_DIR}/createUiDefinition.json > ${BUILD_DIR}/createUiDefinition.json
-	jq \
-		'del(.parameters.email) | \
-		del(.parameters.license) | \
-		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE_EMAIL")) | \
-		del(.. | .environmentVariables? // empty | .[] | select(.name == "WF_LICENSE_KEY"))' \
-		${TEMPLATE_DIR}/azuredeploy.json > ${BUILD_DIR}/azuredeploy.json
 
 create-appvia-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for internal testing within an Appvia Tenant"
