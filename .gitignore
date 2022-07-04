@@ -35,5 +35,4 @@ Sessionx.vim
 # Build and Test files
 .build
 .env
-scriptoutputs.json
-wf-parameters.env
+parameters.json
