@@ -2,8 +2,16 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "wfPlanId": {
+      "type": "string",
+      "defaultValue": "wayfinder-standard",
+      "metadata": {
+        "description": "The Azure Marketplace Wayfinder Offer Plan ID"
+      }
+    },
     "clusterName": {
       "type": "string",
+      "defaultValue": "wayfinder",
       "metadata": {
         "description": "The name of the Wayfinder management cluster."
       }
@@ -63,7 +71,6 @@
     "managedIdentityWFInstaller": "wayfinder-installer",
     "managedIdentityWF": "wayfinder-default",
     "deploymentWFInstaller": "wayfinder-installer",
-    "wfPlanID": "wayfinder-standard",
     "wfDimension": "vcpu",
     "deploymentGetAKSMI": "wayfinder-get-aks-mi",
     "deploymentNRGAccess": "wayfinder-node-resource-group-access",
@@ -77,7 +84,7 @@
       "comments": "*** Azure Marketplace required usage attribution tracking GUID ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter",
+      "name": "pid-188392e6-9687-4e00-8c58-904709546b4a",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -356,7 +363,7 @@
           },
           {
             "name": "WF_PLAN_ID",
-            "value": "[variables('wfPlanID')]"
+            "value": "[parameters('wfPlanId')]"
           },
           {
             "name": "WF_DIMENSION",

@@ -79,9 +79,9 @@ check-envs() {
     ; do check_var ${var:-}
   done
 
-  if [[ -n ${WF_LICENSE_KEY:-} ]]; then
+  if [[ ! -z "${WF_LICENSE_KEY}" ]]; then
     LICENSE_OPT="--license-key ${WF_LICENSE_KEY}"
-  elif [[ -n ${WF_LICENSE_EMAIL:-} ]]; then
+  elif [[ ! -z "${WF_LICENSE_EMAIL}" ]]; then
     LICENSE_OPT="--license-email ${WF_LICENSE_EMAIL}"
   fi
 }
