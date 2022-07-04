@@ -9,6 +9,13 @@
         "description": "The Azure Marketplace usage attribution tracking GUID"
       }
     },
+    "wfPlanId": {
+      "type": "string",
+      "defaultValue": "wayfinder-standard",
+      "metadata": {
+        "description": "The Azure Marketplace Wayfinder Offer Plan ID"
+      }
+    },
     "clusterName": {
       "type": "string",
       "defaultValue": "wayfinder",
@@ -71,7 +78,6 @@
     "managedIdentityWFInstaller": "wayfinder-installer",
     "managedIdentityWF": "wayfinder-default",
     "deploymentWFInstaller": "wayfinder-installer",
-    "wfPlanID": "wayfinder-standard",
     "wfDimension": "vcpu",
     "deploymentGetAKSMI": "wayfinder-get-aks-mi",
     "deploymentNRGAccess": "wayfinder-node-resource-group-access",
@@ -364,7 +370,7 @@
           },
           {
             "name": "WF_PLAN_ID",
-            "value": "[variables('wfPlanID')]"
+            "value": "[parameters('wfPlanId')]"
           },
           {
             "name": "WF_DIMENSION",

@@ -34,9 +34,9 @@ create-appvia-package: create-build-dir copy-to-build-dir strip-license
 	jq \
 		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
 		.parameters.partnerId.defaultValue = "${TRACKING_ID}" | \
+		.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
-		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
-		.variables.wfPlanID = "${WF_PLAN_ID}"' \
+		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	$(MAKE) package
@@ -45,9 +45,9 @@ create-external-package: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
 		'.parameters.partnerId.defaultValue = "${TRACKING_ID}" | \
+		.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
-		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
-		.variables.wfPlanID = "${WF_PLAN_ID}"' \
+		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	@$(MAKE) package
