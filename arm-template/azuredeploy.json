@@ -187,13 +187,32 @@
       }
     },
     {
+      "comments": "*** After creating the AKS resource, wait via sleep for up to 10+ minutes to make sure that AMA RP role assignment is properly applied to the AKS Node Resource Group and not receive intermittent Forbidden error from ARM ***",
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "sleep-after-aks",
+      "location": "[parameters('location')]",
+      "kind": "AzureCLI",
+      "dependsOn": [
+        "[parameters('clusterName')]"
+      ],
+      "properties": {
+        "azCliVersion": "2.32.0",
+        "scriptContent": "sleep 600",
+        "cleanupPreference": "OnSuccess",
+        "retentionInterval": "PT4H",
+        "timeout": "PT2H"
+      }
+    },
+    {
       "comments": "*** After AKS cluster gets deployed, use inner-scope nested template to get AKS managed identity resourceId and principalId ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "[variables('deploymentGetAKSMI')]",
       "resourceGroup": "[variables('nodeResourceGroup')]",
       "dependsOn": [
-        "[parameters('clusterName')]"
+        "[parameters('clusterName')]",
+        "sleep-after-aks"
       ],
       "properties": {
         "mode": "Incremental",
