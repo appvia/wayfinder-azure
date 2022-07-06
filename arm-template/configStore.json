@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "configStoreName": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the name of the App Configuration store."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Specifies the Azure location where the app configuration store should be created."
+      }
+    },
+    "keyValueNames": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Specifies the names of the key-value resources. The name is a combination of key and label with $ as delimiter. The label is optional."
+      }
+    },
+    "keyValueValues": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Specifies the values of the key-value resources. It's optional"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[parameters('configStoreName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "standard"
+      }
+    },
+    {
+      "copy": {
+        "name": "configStoreKeyValue",
+        "count": "[length(parameters('keyValueNames'))]"
+      },
+      "type": "Microsoft.AppConfiguration/configurationStores/keyValues",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('configStoreName'), parameters('keyValueNames')[copyIndex()])]",
+      "properties": {
+        "value": "[parameters('keyValueValues')[copyIndex()]]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', parameters('configStoreName'))]"
+      ]
+    }
+  ]
+}
