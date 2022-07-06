@@ -2,7 +2,7 @@ BUILD_DIR=.build
 TEMPLATE_DIR=arm-template
 WF_VERSION ?= latest
 WF_RELEASE_CHANNEL ?= releases
-WF_PLAN_ID ?= wayfinder-standard
+WF_PLAN_ID ?= standard
 TRACKING_ID ?= pid-3b0884cf-abb0-46cf-a48b-55ee7245e8a9-partnercenter
 
 create-build-dir:

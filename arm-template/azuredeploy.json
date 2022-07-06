@@ -4,7 +4,7 @@
   "parameters": {
     "wfPlanId": {
       "type": "string",
-      "defaultValue": "wayfinder-standard",
+      "defaultValue": "standard",
       "metadata": {
         "description": "The Azure Marketplace Wayfinder Offer Plan ID"
       }
