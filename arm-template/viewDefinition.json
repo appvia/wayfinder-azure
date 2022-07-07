@@ -1,0 +1,13 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/viewdefinition/0.0.1-preview/ViewDefinition.json#",
+    "contentVersion": "0.0.0.1",
+    "views": [
+        {
+            "kind": "Overview",
+            "properties": {
+                "header": "Appvia Wayfinder",
+                "description": "## Important Next Steps\n\nClick **Parameters and Outputs** on the left of this page to view the URL and access credentials for your Wayfinder instance.\n\nFor more information, see **[Wayfinder Next Steps for Azure](https://docs.appvia.io/wayfinder/installing/marketplace-azure)**."
+            }
+        }
+    ]
+}

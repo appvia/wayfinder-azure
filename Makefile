@@ -48,5 +48,5 @@ create-external-package: create-build-dir copy-to-build-dir strip-license
 
 package:
 	@echo "--> Packaging contents"
-	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json scripts/wayfinder.sh
+	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json viewDefinition.json scripts/wayfinder.sh
 	@echo "--> Package file is located at: ${BUILD_DIR}/app.zip"
