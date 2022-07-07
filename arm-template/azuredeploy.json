@@ -321,7 +321,7 @@
         "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
+        "[parameters('clusterName')]"
       ]
     },
     {
