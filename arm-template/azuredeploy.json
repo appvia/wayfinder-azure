@@ -204,6 +204,12 @@
       "dependsOn": [
         "[parameters('clusterName')]"
       ],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]": {}
+        }
+      },
       "properties": {
         "forceUpdateTag": "[parameters('utcValue')]",
         "azCliVersion": "2.32.0",
@@ -227,8 +233,7 @@
       "resourceGroup": "[variables('nodeResourceGroup')]",
       "dependsOn": [
         "[variables('managedIdentityWF')]",
-        "[parameters('clusterName')]",
-        "get-kubelet-mi"
+        "[parameters('clusterName')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -236,32 +241,6 @@
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
           "resources": [
-            {
-              "comments": "*** Assign Virtual Machine Contributor role to AKS' managed identity (for AAD Pod Identity to work) ***",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-10-01-preview",
-              "name": "[variables('roleAssignmentNRGVirtualMachineContributorAKSVMO')]",
-              "properties": {
-                "roleDefinitionId": "[variables('roleDefinitionVirtualMachineContributor')]",
-                "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
-                "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
-              }
-            },
-            {
-              "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the node RG) ***",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-10-01-preview",
-              "name": "[variables('roleAssignmentNRGManagedIdentityOperatorAKSMI')]",
-              "properties": {
-                "roleDefinitionId": "[variables('roleDefinitionManagedIdentityOperator')]",
-                "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
-                "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
-              }
-            },
             {
               "comments": "*** Assign read role to Wayfinder managed identity (to allow audit of managedBy property of resource group) ***",
               "type": "Microsoft.Authorization/roleAssignments",
@@ -274,6 +253,38 @@
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
                 "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), json('null'))]"
               }
+            },
+            {
+              "comments": "*** Assign Virtual Machine Contributor role to AKS' managed identity (for AAD Pod Identity to work) ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-10-01-preview",
+              "name": "[variables('roleAssignmentNRGVirtualMachineContributorAKSVMO')]",
+              "properties": {
+                "roleDefinitionId": "[variables('roleDefinitionVirtualMachineContributor')]",
+                "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
+                "principalType": "ServicePrincipal",
+                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
+              },
+              "dependsOn": [
+                "get-kubelet-mi"
+              ]
+            },
+            {
+              "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the node RG) ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-10-01-preview",
+              "name": "[variables('roleAssignmentNRGManagedIdentityOperatorAKSMI')]",
+              "properties": {
+                "roleDefinitionId": "[variables('roleDefinitionManagedIdentityOperator')]",
+                "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
+                "principalType": "ServicePrincipal",
+                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
+              },
+              "dependsOn": [
+                "get-kubelet-mi"
+              ]
             }
           ]
         }
