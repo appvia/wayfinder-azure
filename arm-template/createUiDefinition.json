@@ -181,7 +181,7 @@
                     {
                         "name": "legalAcceptSAMTOS",
                         "type": "Microsoft.Common.CheckBox",
-                        "label": "<a href=\"https://www.appvia.io/support-and-maintenance-terms-of-service?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Support and Maintenance Terms of Service</a>",
+                        "label": "<a href=\"https://docs.appvia.io/wayfinder/support?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Support and Maintenance Terms of Service</a>",
                         "toolTip": "Whether you agree to the required Support and Maintenance Terms of Service",
                         "constraints": {
                             "required": true,
