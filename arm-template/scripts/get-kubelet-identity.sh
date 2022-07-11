@@ -27,17 +27,16 @@ get_kubelet_identity() {
     echo "--> Checking for Kubelet Identity. Retry Delay: ${RETRY_DELAY_SECONDS} seconds, Max Retries: ${MAX_RETRIES}"
     RETRY_COUNT=0
     while [ $RETRY_COUNT -le $MAX_RETRIES ]; do
+        RETRY_COUNT=$((RETRY_COUNT+1))
         echo "--> Iteration Count: ${RETRY_COUNT}"
         sleep ${RETRY_DELAY_SECONDS}
 
         KUBELET_MI_RESOURCE_ID=$(az aks show --name wayfinder -g ${RESOURCE_GROUP} -o tsv --query identityProfile.kubeletidentity.resourceId 2> /dev/null)
         if [ -z "$KUBELET_MI_RESOURCE_ID" ]; then
-            RETRY_COUNT=$((RETRY_COUNT+1))
             continue
         else
             KUBELET_MI_PRINCIPAL_ID=$(az identity show --ids "${KUBELET_MI_RESOURCE_ID}" -o tsv --query principalId 2> /dev/null)
             if [ -z "$KUBELET_MI_PRINCIPAL_ID" ]; then
-                RETRY_COUNT=$((RETRY_COUNT+1))
                 continue
             else
                 echo "--> Kubelet Identity was successfully detected. Resource ID: '${KUBELET_MI_RESOURCE_ID}', Principal ID: '${KUBELET_MI_PRINCIPAL_ID}'"
