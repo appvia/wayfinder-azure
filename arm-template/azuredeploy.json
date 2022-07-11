@@ -52,6 +52,13 @@
     "releases": {
       "type": "string",
       "defaultValue": "releases"
+    },
+    "tenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "metadata": {
+        "description": "This value is updated when published via the Azure Marketplace, with the value being replaced by the publisher's Tenant ID."
+      }
     }
   },
   "variables": {
@@ -77,7 +84,8 @@
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]",
-    "wfDownloadURL": "[uri('https://storage.googleapis.com/', concat('wayfinder-', parameters('releases'), '/', parameters('version'), '/wf-cli-linux-amd64'))]"
+    "wfDownloadURL": "[uri('https://storage.googleapis.com/', concat('wayfinder-', parameters('releases'), '/', parameters('version'), '/wf-cli-linux-amd64'))]",
+    "crossTenant": "[not(equals(subscription().tenantId, parameters('tenantId')))]"
   },
   "resources": [
     {
@@ -118,7 +126,7 @@
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller')), '2018-11-30').principalId]",
         "scope": "[resourceGroup().id]",
         "principalType": "ServicePrincipal",
-        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
+        "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller')), json('null'))]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWFInstaller'))]"
@@ -134,7 +142,7 @@
         "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), '2018-11-30').principalId]",
         "scope": "[resourceGroup().id]",
         "principalType": "ServicePrincipal",
-        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]"
+        "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), json('null'))]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]"
@@ -275,7 +283,7 @@
                 "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value, json('null'))]"
               }
             },
             {
@@ -288,7 +296,7 @@
                 "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value, json('null'))]"
               }
             },
             {
@@ -301,7 +309,7 @@
                 "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), '2018-11-30').principalId]",
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF'))]"
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), json('null'))]"
               }
             }
           ]
@@ -318,7 +326,7 @@
         "principalId": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-11-01', 'Full').identity.principalId]",
         "scope": "[resourceGroup().id]",
         "principalType": "ServicePrincipal",
-        "delegatedManagedIdentityResourceId": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]"
+        "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), json('null'))]"
       },
       "dependsOn": [
         "[parameters('clusterName')]"
@@ -334,7 +342,7 @@
         "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
         "principalType": "ServicePrincipal",
         "scope": "[resourceGroup().id]",
-        "delegatedManagedIdentityResourceId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
+        "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value, json('null'))]"
       },
       "dependsOn": [
         "[variables('deploymentGetAKSMI')]"

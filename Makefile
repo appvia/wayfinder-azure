@@ -1,13 +1,18 @@
+.DEFAULT_GOAL := dist
 BUILD_DIR=.build
 TEMPLATE_DIR=arm-template
 WF_VERSION ?= latest
 WF_RELEASE_CHANNEL ?= releases
 WF_PLAN_ID ?= standard
 TRACKING_ID ?= pid-3b0884cf-abb0-46cf-a48b-55ee7245e8a9-partnercenter
+TENANT_ID ?= 7a770e35-b455-4df2-a276-b07408438d9a
 
-create-build-dir:
-	@echo "--> Creating build directory"
+clean:
+	@echo "--> Removing existing build assets"
 	rm -rf ${BUILD_DIR}/
+
+create-build-dir: clean
+	@echo "--> Creating build directory"
 	mkdir ${BUILD_DIR}
 
 copy-to-build-dir:
@@ -23,25 +28,14 @@ strip-license:
 		del(.parameters.outputs.license)' \
 		${TEMPLATE_DIR}/createUiDefinition.json > ${BUILD_DIR}/createUiDefinition.json
 
-create-appvia-package: create-build-dir copy-to-build-dir strip-license
-	@echo "--> Creating a package for internal testing within an Appvia Tenant"
-	jq \
-		'walk(if type == "object" then with_entries(select(.key | test("delegatedManagedIdentityResourceId") | not)) else . end) | \
-		.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
-		.parameters.version.defaultValue = "${WF_VERSION}" | \
-		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
-		.resources[0].name = "${TRACKING_ID}"' \
-		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
-
-	$(MAKE) package
-
-create-external-package: create-build-dir copy-to-build-dir strip-license
+dist: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
 		'.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
-		.resources[0].name = "${TRACKING_ID}"' \
+		.resources[0].name = "${TRACKING_ID}" | \
+		.parameters.tenantId.defaultValue = "${TENANT_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 
 	@$(MAKE) package
