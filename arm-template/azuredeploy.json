@@ -80,7 +80,8 @@
     "managedIdentityWF": "wayfinder-default",
     "deploymentWFInstaller": "wayfinder-installer",
     "wfDimension": "vcpu",
-    "deploymentNRGAccess": "wayfinder-node-resource-group-access",
+    "deploymentNRGWFReadAccess": "wayfinder-nrg-read-access",
+    "deploymentNRGAccess": "wayfinder-nrg-access",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
     "wfInstanceID": "[uniqueString(resourceGroup().id)]",
@@ -195,6 +196,39 @@
       }
     },
     {
+      "comments": "*** Nested cross-resource-group role assignment for Read access in the AKS NODE Resource Group ***",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('deploymentNRGWFReadAccess')]",
+      "resourceGroup": "[variables('nodeResourceGroup')]",
+      "dependsOn": [
+        "[variables('managedIdentityWF')]",
+        "[parameters('clusterName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "comments": "*** Assign read role to Wayfinder managed identity (to allow audit of managedBy property of resource group) ***",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-10-01-preview",
+              "name": "[variables('roleAssignmentNRGReaderWFDefaultIdentity')]",
+              "properties": {
+                "roleDefinitionId": "[variables('roleDefinitionReader')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), '2018-11-30').principalId]",
+                "principalType": "ServicePrincipal",
+                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), json('null'))]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
       "comments": "*** After creating the AKS resource, attempt to retrieve the Kubelet Managed Identity with a timeout after 60 minutes ***",
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
@@ -202,7 +236,8 @@
       "location": "[parameters('location')]",
       "kind": "AzureCLI",
       "dependsOn": [
-        "[parameters('clusterName')]"
+        "[parameters('clusterName')]",
+        "[variables('deploymentNRGWFReadAccess')]"
       ],
       "identity": {
         "type": "UserAssigned",
@@ -233,7 +268,8 @@
       "resourceGroup": "[variables('nodeResourceGroup')]",
       "dependsOn": [
         "[variables('managedIdentityWF')]",
-        "[parameters('clusterName')]"
+        "[parameters('clusterName')]",
+        "get-kubelet-mi"
       ],
       "properties": {
         "mode": "Incremental",
@@ -241,19 +277,6 @@
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
           "resources": [
-            {
-              "comments": "*** Assign read role to Wayfinder managed identity (to allow audit of managedBy property of resource group) ***",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-10-01-preview",
-              "name": "[variables('roleAssignmentNRGReaderWFDefaultIdentity')]",
-              "properties": {
-                "roleDefinitionId": "[variables('roleDefinitionReader')]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), '2018-11-30').principalId]",
-                "principalType": "ServicePrincipal",
-                "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityWF')), json('null'))]"
-              }
-            },
             {
               "comments": "*** Assign Virtual Machine Contributor role to AKS' managed identity (for AAD Pod Identity to work) ***",
               "type": "Microsoft.Authorization/roleAssignments",
@@ -265,10 +288,7 @@
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
                 "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
-              },
-              "dependsOn": [
-                "get-kubelet-mi"
-              ]
+              }
             },
             {
               "comments": "*** Assign Managed Identity Operator role to AKS' managed identity (for access to AzureIdentities refering to MIs in the node RG) ***",
@@ -281,10 +301,7 @@
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
                 "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
-              },
-              "dependsOn": [
-                "get-kubelet-mi"
-              ]
+              }
             }
           ]
         }
