@@ -42,5 +42,5 @@ dist: create-build-dir copy-to-build-dir strip-license
 
 package:
 	@echo "--> Packaging contents"
-	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json viewDefinition.json scripts/wayfinder.sh
+	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json viewDefinition.json scripts/wayfinder.sh scripts/get-kubelet-identity.sh
 	@echo "--> Package file is located at: ${BUILD_DIR}/app.zip"
