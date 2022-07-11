@@ -199,7 +199,7 @@
                         "name": "announcement",
                         "type": "Microsoft.Common.TextBlock",
                         "options": {
-                            "text": "Wayfinder install will take about 30 minutes and will set up an AKS cluster then install and configure Wayfinder on it."
+                            "text": "The install process will take about 30 minutes, as an AKS cluster will be setup and then Wayfinder will be installed and configured in it."
                         }
                     }
                 ],

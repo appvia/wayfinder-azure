@@ -63,6 +63,7 @@
   },
   "variables": {
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
+    "getMIScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/get-kubelet-identity.sh')]",
     "roleDefinitionReader": "[subscriptionResourceId('Microsoft.Authorization/roleAssignments', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
     "roleDefinitionContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
     "roleDefinitionNetworkContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
@@ -79,7 +80,6 @@
     "managedIdentityWF": "wayfinder-default",
     "deploymentWFInstaller": "wayfinder-installer",
     "wfDimension": "vcpu",
-    "deploymentGetAKSMI": "wayfinder-get-aks-mi",
     "deploymentNRGAccess": "wayfinder-node-resource-group-access",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
@@ -195,65 +195,28 @@
       }
     },
     {
-      "comments": "*** After creating the AKS resource, wait via sleep for up to 10+ minutes to make sure that AMA RP role assignment is properly applied to the AKS Node Resource Group and not receive intermittent Forbidden error from ARM ***",
+      "comments": "*** After creating the AKS resource, attempt to retrieve the Kubelet Managed Identity with a timeout after 60 minutes ***",
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2020-10-01",
-      "name": "sleep-after-aks",
+      "name": "get-kubelet-mi",
       "location": "[parameters('location')]",
       "kind": "AzureCLI",
       "dependsOn": [
         "[parameters('clusterName')]"
       ],
       "properties": {
+        "forceUpdateTag": "[parameters('utcValue')]",
         "azCliVersion": "2.32.0",
-        "scriptContent": "sleep 600",
-        "cleanupPreference": "OnSuccess",
-        "retentionInterval": "PT4H",
-        "timeout": "PT2H"
-      }
-    },
-    {
-      "comments": "*** After AKS cluster gets deployed, use inner-scope nested template to get AKS managed identity resourceId and principalId ***",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "name": "[variables('deploymentGetAKSMI')]",
-      "resourceGroup": "[variables('nodeResourceGroup')]",
-      "dependsOn": [
-        "[parameters('clusterName')]",
-        "sleep-after-aks"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "parameters": {
-          "aksMiResourceId": {
-            "value": "[reference(parameters('clusterName'),'2021-10-01','Full').properties.identityProfile.kubeletIdentity.resourceId]"
+        "primaryScriptUri": "[variables('getMIScriptUri')]",
+        "cleanupPreference": "OnExpiration",
+        "retentionInterval": "P1D",
+        "timeout": "PT70M",
+        "environmentVariables": [
+          {
+            "name": "RESOURCE_GROUP",
+            "value": "[resourceGroup().name]"
           }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {
-            "aksMiResourceId": {
-              "type": "string",
-              "defaultValue": ""
-            }
-          },
-          "variables": {},
-          "resources": [],
-          "outputs": {
-            "aksMiResourceId": {
-              "type": "string",
-              "value": "[parameters('aksMiResourceId')]"
-            },
-            "aksMiPrincipalId": {
-              "type": "string",
-              "value": "[reference(parameters('aksMiResourceId'),'2018-11-30','Full').properties.principalId]"
-            }
-          }
-        }
+        ]
       }
     },
     {
@@ -265,7 +228,7 @@
       "dependsOn": [
         "[variables('managedIdentityWF')]",
         "[parameters('clusterName')]",
-        "[variables('deploymentGetAKSMI')]"
+        "get-kubelet-mi"
       ],
       "properties": {
         "mode": "Incremental",
@@ -280,10 +243,10 @@
               "name": "[variables('roleAssignmentNRGVirtualMachineContributorAKSVMO')]",
               "properties": {
                 "roleDefinitionId": "[variables('roleDefinitionVirtualMachineContributor')]",
-                "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
+                "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value, json('null'))]"
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
               }
             },
             {
@@ -293,10 +256,10 @@
               "name": "[variables('roleAssignmentNRGManagedIdentityOperatorAKSMI')]",
               "properties": {
                 "roleDefinitionId": "[variables('roleDefinitionManagedIdentityOperator')]",
-                "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
+                "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
                 "principalType": "ServicePrincipal",
                 "scope": "[concat(subscription().id, '/resourceGroups/', variables('nodeResourceGroup'))]",
-                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value, json('null'))]"
+                "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
               }
             },
             {
@@ -339,13 +302,13 @@
       "apiVersion": "2020-10-01-preview",
       "properties": {
         "roleDefinitionId": "[variables('roleDefinitionManagedIdentityOperator')]",
-        "principalId": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiPrincipalId.value]",
+        "principalId": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletPrincipalId]",
         "principalType": "ServicePrincipal",
         "scope": "[resourceGroup().id]",
-        "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value, json('null'))]"
+        "delegatedManagedIdentityResourceId": "[if(variables('crossTenant'), reference(resourceId('Microsoft.Resources/deploymentScripts', 'get-kubelet-mi')).outputs.kubeletResourceId, json('null'))]"
       },
       "dependsOn": [
-        "[variables('deploymentGetAKSMI')]"
+        "get-kubelet-mi"
       ]
     },
     {
