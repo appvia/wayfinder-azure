@@ -567,14 +567,6 @@
             "value": "[parameters('clusterName')]"
           },
           {
-            "name": "WF_PLAN_ID",
-            "value": "[parameters('wfPlanId')]"
-          },
-          {
-            "name": "WF_DIMENSION",
-            "value": "[parameters('wfDimension')]"
-          },
-          {
             "name": "RESOURCE_GROUP",
             "value": "[resourceGroup().name]"
           },

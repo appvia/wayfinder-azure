@@ -53,8 +53,6 @@ deploy() {
     --instance-identifier ${WF_INSTANCE_ID} \
     --non-interactive \
     --disable-idp \
-    --azure-plan-id ${WF_PLAN_ID} \
-    --azure-dimension ${WF_DIMENSION} \
     --azure-resourcegroup ${RESOURCE_GROUP} \
     --azure-node-resourcegroup ${NG_RESOURCE_GROUP} \
     --azure-default-identity ${WF_IDENTITY_NAME} \
@@ -74,8 +72,6 @@ check-envs() {
     WF_IDENTITY_NAME \
     IP_NAME \
     WF_INSTANCE_ID \
-    WF_PLAN_ID \
-    WF_DIMENSION \
     ; do check_var ${var:-}
   done
 
