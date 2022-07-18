@@ -31,7 +31,7 @@ strip-license:
 dist: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
-		'.parameters.wfPlanId.defaultValue = "${WF_PLAN_ID}" | \
+		'.variables.wfPlanId = "${WF_PLAN_ID}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
 		.resources[0].name = "${TRACKING_ID}" | \

@@ -2,27 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "wfPlanId": {
-      "type": "string",
-      "defaultValue": "standard",
-      "metadata": {
-        "description": "The Azure Marketplace Wayfinder Offer Plan ID"
-      }
-    },
-    "wfDimension": {
-      "type": "string",
-      "defaultValue": "vcpu",
-      "metadata": {
-        "description": "The dimension used for emitting usage events"
-      }
-    },
-    "wfDimensionInclusiveAmount": {
-      "type": "int",
-      "defaultValue": 10,
-      "metadata": {
-        "description": "The inclusive amount of the Azure Marketplace Wayfinder Offer Plan"
-      }
-    },
     "clusterName": {
       "type": "string",
       "defaultValue": "wayfinder",
@@ -76,6 +55,9 @@
     }
   },
   "variables": {
+    "wfPlanId": "standard",
+    "wfDimension": "vcpu",
+    "wfDimensionInclusiveAmount": 10,
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
     "roleDefinitionAppConfigDataReader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '516239f1-63e1-4d78-a4de-a74fb236a071')]",
     "roleDefinitionReader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
@@ -151,7 +133,7 @@
       "name": "[concat(variables('configStoreName'), '/wfPlanId')]",
       "properties": {
         "contentType": "application/json",
-        "value": "[parameters('wfPlanId')]"
+        "value": "[variables('wfPlanId')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.AppConfiguration/configurationStores', variables('configStoreName'))]"
@@ -163,7 +145,7 @@
       "name": "[concat(variables('configStoreName'), '/wfDimension')]",
       "properties": {
         "contentType": "application/json",
-        "value": "[parameters('wfDimension')]"
+        "value": "[variables('wfDimension')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.AppConfiguration/configurationStores', variables('configStoreName'))]"
@@ -175,7 +157,7 @@
       "name": "[concat(variables('configStoreName'), '/wfDimensionInclusiveAmount')]",
       "properties": {
         "contentType": "application/json",
-        "value": "[parameters('wfDimensionInclusiveAmount')]"
+        "value": "[variables('wfDimensionInclusiveAmount')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.AppConfiguration/configurationStores', variables('configStoreName'))]"

@@ -62,7 +62,7 @@ fetch_parameters_configstore() {
     rm -f ${PARAMETERS_FILE}
     local configstore_name=$(az appconfig list --subscription ${FLAG_SUBSCRIPTION} -g ${MANAGED_RESOURCE_GROUP} --query "[0].name" -o tsv)
     az appconfig kv export --subscription ${FLAG_SUBSCRIPTION} -n ${configstore_name} -d file --path ${PARAMETERS_FILE} --format json --yes
-    PARAMETERS_CONFIGSTORE=$(jq -r 'to_entries | .[] | {(.key) : {value: .value}}' ${PARAMETERS_FILE} | jq -cs add)
+    PARAMETERS_CONFIGSTORE=$(jq -r 'del(.wfPlanId, .wfDimension, .wfDimensionInclusiveAmount) | to_entries | .[] | {(.key) : {value: .value}}' ${PARAMETERS_FILE} | jq -cs add)
 }
 
 # Fetch the name of the Managed Resource Group where the Wayfinder resources reside.
