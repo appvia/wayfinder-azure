@@ -31,3 +31,9 @@ Sessionx.vim
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/go,vim,visualstudiocode
+
+# Build and Test files
+.build
+.env
+parameters.json
+scriptoutputs.json

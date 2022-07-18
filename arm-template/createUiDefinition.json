@@ -8,10 +8,12 @@
             "resourceTypes": [
                 "Microsoft.ManagedIdentity/userAssignedIdentities",
                 "Microsoft.Authorization/roleAssignments",
+                "Microsoft.Resources/deployments",
                 "Microsoft.Resources/deploymentScripts",
                 "Microsoft.ContainerService/managedClusters",
                 "Microsoft.ContainerService/PodSecurityPolicyPreview",
-                "Microsoft.Network/publicIPAddresses"
+                "Microsoft.Network/publicIPAddresses",
+                "Microsoft.AppConfiguration/configurationStores"
             ],
             "basics": {
                 "description": "This template deploys [Wayfinder](https://www.appvia.io/wayfinder). Wayfinder provides creation and fleet management of cloud Kubernetes. For more information see [Wayfinder Documentation](https://docs.appvia.io/wayfinder).",
@@ -146,23 +148,6 @@
                 ]
             },
             {
-                "name": "jitConfiguration",
-                "label": "Just-In-Time Access",
-                "subLabel": {
-                    "preValidation": "Configure JIT settings for your application",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "JIT Configuration",
-                "elements": [
-                    {
-                      "name": "jitConfigurationControl",
-                      "type": "Microsoft.Solutions.JitConfigurator",
-                      "label": "JIT Configuration",
-                      "toolTip": "JIT Access enables Appvia Support to request elevated access to your Wayfinder installation for troubleshooting, rather than having full access by default."
-                    }
-                ]
-            },
-            {
                 "name": "acceptLegal",
                 "label": "Legal Agreements",
                 "elements": [
@@ -176,7 +161,6 @@
                     {
                         "name": "legalAcceptSLA",
                         "type": "Microsoft.Common.CheckBox",
-                        "visible": "[equals(steps('license').newFreeLicense, true)]",
                         "label": "<a href=\"https://www.appvia.io/software-license-agreement-free?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Software License Agreement</a>",
                         "toolTip": "Whether you agree to the required Software License Agreement",
                         "constraints": {
@@ -206,14 +190,27 @@
                     }
                 ],
                 "visible": true
+            },
+            {
+                "name": "installReady",
+                "label": "Ready to Install",
+                "elements": [
+                    {
+                        "name": "announcement",
+                        "type": "Microsoft.Common.TextBlock",
+                        "options": {
+                            "text": "Wayfinder install will take about 30 minutes and will set up an AKS cluster then install and configure Wayfinder on it."
+                        }
+                    }
+                ],
+                "visible": true
             }
          ],
         "outputs": {
             "location": "[location()]",
             "clusterName": "[basics('clusterName')]",
             "email": "[steps('license').freeLicense.email]",
-            "license": "[steps('license').existingLicense.key]",
-            "jitAccessPolicy": "[steps('jitConfiguration').jitConfigurationControl]"
+            "license": "[steps('license').existingLicense.key]"
         }
     }
 }

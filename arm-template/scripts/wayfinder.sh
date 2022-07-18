@@ -20,10 +20,9 @@ set -o nounset
 set -o pipefail
 ${TRACE:+set -x}
 
-# Dev latest
-#WF_INSTALL_URL="https://storage.googleapis.com/wayfinder-dev-releases/latest/wf-cli-linux-amd64"
-# TODO update to release latest (after 1.3 is released)
-WF_INSTALL_URL=https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64
+# Set defaults
+WF_INSTALL_URL=${WF_INSTALL_URL:-https://storage.googleapis.com/wayfinder-releases/latest/wf-cli-linux-amd64}
+AZ_SCRIPTS_OUTPUT_PATH=${AZ_SCRIPTS_OUTPUT_PATH:-"./scriptoutputs.json"}
 
 error_exit() {
     echo ${1}
@@ -38,9 +37,11 @@ check_var() {
 }
 
 download() {
-  curl -L ${WF_INSTALL_URL} --output /tmp/wf
+  echo "Downloading Wayfinder Release: ${WF_INSTALL_URL}"
+  curl -sSL ${WF_INSTALL_URL} --output /tmp/wf
   chmod +x /tmp/wf
   mv /tmp/wf /usr/local/bin/wf
+  echo "Wayfinder Version => $(wf version)"
 }
 
 deploy() {
@@ -52,7 +53,11 @@ deploy() {
     --instance-identifier ${WF_INSTANCE_ID} \
     --non-interactive \
     --disable-idp \
+    --azure-plan-id ${WF_PLAN_ID} \
+    --azure-dimension ${WF_DIMENSION} \
     --azure-resourcegroup ${RESOURCE_GROUP} \
+    --azure-node-resourcegroup ${NG_RESOURCE_GROUP} \
+    --azure-default-identity ${WF_IDENTITY_NAME} \
     --azure-ingress-ip-name ${IP_NAME} \
     --json-file ${AZ_SCRIPTS_OUTPUT_PATH} \
     ${LICENSE_OPT:-}
@@ -65,17 +70,19 @@ check-envs() {
     REGION \
     CLUSTER_NAME \
     RESOURCE_GROUP \
+    NG_RESOURCE_GROUP \
+    WF_IDENTITY_NAME \
     IP_NAME \
     WF_INSTANCE_ID \
-    AZ_SCRIPTS_OUTPUT_PATH \
+    WF_PLAN_ID \
+    WF_DIMENSION \
     ; do check_var ${var:-}
   done
 
-  if [[ -n ${WF_LICENSE:-} ]]; then
-    LICENSE_OPT="--license-key ${WF_LICENSE:-}"
-  else
-    check_var WF_EMAIL
-    LICENSE_OPT="--license-email ${WF_EMAIL}"
+  if [[ ! -z "${WF_LICENSE_KEY}" ]]; then
+    LICENSE_OPT="--license-key ${WF_LICENSE_KEY}"
+  elif [[ ! -z "${WF_LICENSE_EMAIL}" ]]; then
+    LICENSE_OPT="--license-email ${WF_LICENSE_EMAIL}"
   fi
 }
 
