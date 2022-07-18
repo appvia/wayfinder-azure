@@ -27,10 +27,9 @@ DEFAULT_RELEASE_VERSION="main"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 FLAG_SUBSCRIPTION=""
 FLAG_RESOURCE_GROUP=""
-FLAG_NAME="${DEFAULT_APP_NAME}"
+FLAG_NAME=""
 FLAG_RELEASE="${DEFAULT_RELEASE_VERSION}"
 MANAGED_RESOURCE_GROUP=""
-PARAMETERS_MANAGEDAPP=""
 PARAMETERS_CONFIGSTORE=""
 
 # Help instructions for this script.
@@ -57,38 +56,19 @@ check_required_arguments() {
     done
 }
 
-# Fetch parameters originally provided to the Managed Application at time of installation.
-fetch_parameters_managedapp() {
-    echo "--> Fetching parameters that were provided at install time to the Managed Application '${FLAG_NAME}'."
-    PARAMETERS_MANAGEDAPP=$(az managedapp show --subscription ${FLAG_SUBSCRIPTION} -g ${FLAG_RESOURCE_GROUP} -n ${FLAG_NAME} --query parameters)
-}
-
-# Fetch parameters within an Application Config Store
+# Fetch parameters from the Wayfinder Application Config Store
 fetch_parameters_configstore() {
-    echo "--> Retrieving parameters within the Configuration Store '${MANAGED_RESOURCE_GROUP}'."
-    local parameters=$(az appconfig kv list --subscription ${FLAG_SUBSCRIPTION} -n ${MANAGED_RESOURCE_GROUP})
-    PARAMETERS_CONFIGSTORE=$(echo ${parameters} | jq '.[] | {(.key) : {value: .value}}' | jq -cs add)
+    echo "--> Retrieving parameters from the Wayfinder Configuration Store."
+    rm -f ${PARAMETERS_FILE}
+    local configstore_name=$(az appconfig list --subscription ${FLAG_SUBSCRIPTION} -g ${MANAGED_RESOURCE_GROUP} --query "[0].name" -o tsv)
+    az appconfig kv export --subscription ${FLAG_SUBSCRIPTION} -n ${configstore_name} -d file --path ${PARAMETERS_FILE} --format json --yes
+    PARAMETERS_CONFIGSTORE=$(jq -r 'to_entries | .[] | {(.key) : {value: .value}}' ${PARAMETERS_FILE} | jq -cs add)
 }
 
 # Fetch the name of the Managed Resource Group where the Wayfinder resources reside.
 fetch_mrg_name() {
     echo "--> Retrieving the Managed Resource Group associated with the Managed Application '${FLAG_NAME}'."
     MANAGED_RESOURCE_GROUP=$(az managedapp show --subscription ${FLAG_SUBSCRIPTION} -g ${FLAG_RESOURCE_GROUP} -n ${FLAG_NAME} -o tsv --query managedResourceGroupId | sed 's/.*\///')
-}
-
-# Create an Application Config Store containing Parameters for the Wayfinder ARM Template
-create_configstore() {
-    if ! az appconfig show --subscription ${FLAG_SUBSCRIPTION} -g ${MANAGED_RESOURCE_GROUP} -n ${MANAGED_RESOURCE_GROUP} &>/dev/null; then
-        echo "--> Configuration Store for Managed Application '${FLAG_NAME}' does not exist, creating one now."
-
-        fetch_parameters_managedapp
-        local keys=$(echo ${PARAMETERS_MANAGEDAPP} | jq -c 'keys')
-        local values=$(echo ${PARAMETERS_MANAGEDAPP} | jq -c '[.[].value]')
-
-        az deployment group create --name wf-configStore-${TIMESTAMP}-${FLAG_RELEASE} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/configStore.json --parameters configStoreName=${MANAGED_RESOURCE_GROUP} keyValueNames=${keys} keyValueValues=${values}
-    else
-        echo "--> Configuration Store '${MANAGED_RESOURCE_GROUP}' already exists, skipping creation."
-    fi
 }
 
 # Perform an upgrade of the Managed Application by redeploying the ARM Template at a specified version.
@@ -102,7 +82,6 @@ upgrade() {
 main() {
     check_required_arguments
     fetch_mrg_name
-    create_configstore
     fetch_parameters_configstore
     upgrade
 }
