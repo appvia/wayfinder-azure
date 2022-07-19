@@ -57,7 +57,7 @@
   "variables": {
     "wfPlanId": "standard",
     "wfDimension": "vcpu",
-    "wfDimensionInclusiveAmount": 10,
+    "wfDimensionInclusiveAmount": 8,
     "installScriptUri": "[uri(deployment().properties.templatelink.uri, 'scripts/wayfinder.sh')]",
     "roleDefinitionAppConfigDataReader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '516239f1-63e1-4d78-a4de-a74fb236a071')]",
     "roleDefinitionReader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",

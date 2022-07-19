@@ -4,6 +4,7 @@ TEMPLATE_DIR=arm-template
 WF_VERSION ?= latest
 WF_RELEASE_CHANNEL ?= releases
 WF_PLAN_ID ?= standard
+WF_DIMENSION_INCLUSIVE_AMOUNT ?= 8
 TRACKING_ID ?= pid-3b0884cf-abb0-46cf-a48b-55ee7245e8a9-partnercenter
 TENANT_ID ?= 7a770e35-b455-4df2-a276-b07408438d9a
 
@@ -32,6 +33,7 @@ dist: create-build-dir copy-to-build-dir strip-license
 	@echo "--> Creating a package for external tenants"
 	jq \
 		'.variables.wfPlanId = "${WF_PLAN_ID}" | \
+		.variables.wfDimensionInclusiveAmount = "${WF_DIMENSION_INCLUSIVE_AMOUNT}" | \
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
 		.resources[0].name = "${TRACKING_ID}" | \
