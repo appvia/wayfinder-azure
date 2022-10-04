@@ -332,7 +332,7 @@
         "nodeResourceGroup": "[variables('nodeResourceGroup')]",
         "dnsPrefix": "[parameters('clusterName')]",
         "enableRBAC": true,
-        "kubernetesVersion": "1.22.6",
+        "kubernetesVersion": "1.23.8",
         "networkProfile": {
           "networkPlugin": "azure",
           "networkPolicy": "calico",
