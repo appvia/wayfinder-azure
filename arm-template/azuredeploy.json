@@ -40,7 +40,7 @@
     },
     "version": {
       "type": "string",
-      "defaultValue": "latest"
+      "defaultValue": "v1.5.3-rc6"
     },
     "releases": {
       "type": "string",
