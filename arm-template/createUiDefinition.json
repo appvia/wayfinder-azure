@@ -169,16 +169,6 @@
                         }
                     },
                     {
-                        "name": "legalAcceptSSAMA",
-                        "type": "Microsoft.Common.CheckBox",
-                        "label": "<a href=\"https://www.appvia.io/software-support-and-maintenance-agreement?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Software Support and Maintenance Agreement</a>",
-                        "toolTip": "Whether you agree to the required Software Support and Maintenance Agreement",
-                        "constraints": {
-                            "required": true,
-                            "validationMessage": "You must accept the Software Support and Maintenance Agreement in order to proceed."
-                        }
-                    },
-                    {
                         "name": "legalAcceptSAMTOS",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "<a href=\"https://docs.appvia.io/wayfinder/support?utm_campaign=Azure%20Marketplace&utm_source=web&utm_medium=Github&utm_term=Azure%20Marketplace&utm_content=Licence%20agreement\">Support and Maintenance Terms of Service</a>",

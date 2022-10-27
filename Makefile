@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := dist
 BUILD_DIR=.build
 TEMPLATE_DIR=arm-template
-WF_VERSION ?= latest
+WF_VERSION ?= v1.6.1
 WF_RELEASE_CHANNEL ?= releases
 WF_PLAN_ID ?= standard
 WF_DIMENSION_INCLUSIVE_AMOUNT ?= 8
