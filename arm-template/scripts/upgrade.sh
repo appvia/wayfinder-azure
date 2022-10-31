@@ -80,7 +80,7 @@ fetch_mrg_name() {
 upgrade() {
     local deployment_name="wf-upgrade-${TIMESTAMP}-${FLAG_RELEASE}"
     echo "--> Performing an upgrade of Wayfinder, deployment name is '${deployment_name}'."
-    az deployment group create --name ${deployment_name} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/azuredeploy.json --parameters ${PARAMETERS_CONFIGSTORE}
+    az deployment group create --name ${deployment_name} --subscription ${FLAG_SUBSCRIPTION} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/azuredeploy.json --parameters ${PARAMETERS_CONFIGSTORE}
 }
 
 # The main function

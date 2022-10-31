@@ -42,6 +42,19 @@ dist: create-build-dir copy-to-build-dir strip-license
 
 	@$(MAKE) package
 
+dev-latest: create-build-dir copy-to-build-dir strip-license
+	@echo "--> Creating a package for E2E testing on the dev-releases channel"
+	jq \
+		'.variables.wfPlanId = "${WF_PLAN_ID}" | \
+		.variables.wfDimensionInclusiveAmount = "${WF_DIMENSION_INCLUSIVE_AMOUNT}" | \
+		.parameters.version.defaultValue = "latest" | \
+		.parameters.releases.defaultValue = "dev-releases" | \
+		.resources[0].name = "pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter" | \
+		.parameters.tenantId.defaultValue = "${TENANT_ID}"' \
+		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
+
+	@$(MAKE) package
+
 package:
 	@echo "--> Packaging contents"
 	cd ${BUILD_DIR} && zip app.zip mainTemplate.json createUiDefinition.json viewDefinition.json scripts/wayfinder.sh
