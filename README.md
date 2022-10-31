@@ -55,8 +55,8 @@ This branch is to be used in Wayfinder end-to-end testing prior to issuing a new
 
 **Note:** If this repository requires an update, you must run `make dev-latest` and publish the resulting `app.zip` file to the "E2E" Offer.
 
-**Offer Listing:** https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/d67dc5ed-2255-482d-8bdb-5c81425b3d83/overview
-**Technical Plan:** https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/d67dc5ed-2255-482d-8bdb-5c81425b3d83/plans/558d30e3-1587-4130-a827-36b9d5c91dd4/technicalconfiguration
+- **[Offer Listing](https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/d67dc5ed-2255-482d-8bdb-5c81425b3d83/overview)**
+- **[Technical Plan](https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/d67dc5ed-2255-482d-8bdb-5c81425b3d83/plans/558d30e3-1587-4130-a827-36b9d5c91dd4/technicalconfiguration)**
 
 #### Pull Requests
 
@@ -71,14 +71,14 @@ The Marketplace Technical Configuration has a strict tagging format, `{integer}.
 When uploading a new package file to the Azure listing, the version should follow Wayfinder (e.g. `1.5.0`), and any subsequent template updates (after the initial published version) will have a incrementing digit suffixed to the version. This is an unlikely and rare case where the template has encountered a failure after a version has already been published (e.g. Azure have made a breaking change conflicting with the ARM template spec).
 
 **Example 1:**
-**Product Version:** v1.6.1
-**Repository Version:** v1.6.1-arm.1 (the first version)
-**Marketplace Listing:** 1.6.1
+- **Product Version:** v1.6.1
+- **Repository Version:** v1.6.1-arm.1 (the first version)
+- **Marketplace Listing:** 1.6.1
 
 **Example 2:**
-**Product Version:** v1.6.1
-**Repository Version:** v1.6.1-arm.5 (template has been incremented 4 times since v1.6.1 was first published)
-**Marketplace Listing:** 1.6.15
+- **Product Version:** v1.6.1
+- **Repository Version:** v1.6.1-arm.5 (template has been incremented 4 times since v1.6.1 was first published)
+- **Marketplace Listing:** 1.6.15
 
 Tags are produced off the `develop` branch, validated and tested in the Azure Marketplace, and then merged into the `main` branch. Because tags are associated with a product version, the version must be updated in the Makefile prior to tagging (modify the value for `WF_VERSION`).
 
@@ -141,14 +141,14 @@ az managedapp delete --subscription <subscription-id> -g <rg-for-managed-app> -n
 
 ### Create assets
 
-For Live Offer: `make dist`
-For E2E Offer: `make dev-latest`
+- Live Offer: `make dist`
+- E2E Offer: `make dev-latest`
 
 The resulting file is located at: `.build/app.zip`
 
 ### Update the Marketplace listing
 
-1. Navigate to https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/3b0884cf-abb0-46cf-a48b-55ee7245e8a9/plans/79f87324-ae57-4ec9-a648-5d6cca31b781/technicalconfiguration
+1. Navigate to [Wayfinder Offer - Technical Configuration](https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/3b0884cf-abb0-46cf-a48b-55ee7245e8a9/plans/79f87324-ae57-4ec9-a648-5d6cca31b781/technicalconfiguration)
 2. Specify the new version according to the versioning strategy mentioned in this README
 3. Upload the `app.zip` you created by drag + dropping into the `Package file` section
 4. Press `Save draft` & `Review and publish`
