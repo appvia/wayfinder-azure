@@ -1,7 +1,8 @@
+SHELL := /bin/bash
 .DEFAULT_GOAL := dist
 BUILD_DIR=.build
 TEMPLATE_DIR=arm-template
-WF_VERSION ?= latest
+WF_VERSION ?= v1.6.1
 WF_RELEASE_CHANNEL ?= releases
 WF_PLAN_ID ?= standard
 WF_DIMENSION_INCLUSIVE_AMOUNT ?= 8
@@ -37,6 +38,19 @@ dist: create-build-dir copy-to-build-dir strip-license
 		.parameters.version.defaultValue = "${WF_VERSION}" | \
 		.parameters.releases.defaultValue = "${WF_RELEASE_CHANNEL}" | \
 		.resources[0].name = "${TRACKING_ID}" | \
+		.parameters.tenantId.defaultValue = "${TENANT_ID}"' \
+		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
+
+	@$(MAKE) package
+
+dev-latest: create-build-dir copy-to-build-dir strip-license
+	@echo "--> Creating a package for E2E testing on the dev-releases channel"
+	jq \
+		'.variables.wfPlanId = "${WF_PLAN_ID}" | \
+		.variables.wfDimensionInclusiveAmount = "${WF_DIMENSION_INCLUSIVE_AMOUNT}" | \
+		.parameters.version.defaultValue = "latest" | \
+		.parameters.releases.defaultValue = "dev-releases" | \
+		.resources[0].name = "pid-d67dc5ed-2255-482d-8bdb-5c81425b3d83-partnercenter" | \
 		.parameters.tenantId.defaultValue = "${TENANT_ID}"' \
 		${BUILD_DIR}/azuredeploy.json > ${BUILD_DIR}/mainTemplate.json
 

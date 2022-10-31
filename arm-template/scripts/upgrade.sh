@@ -29,6 +29,8 @@ FLAG_SUBSCRIPTION=""
 FLAG_RESOURCE_GROUP=""
 FLAG_NAME=""
 FLAG_RELEASE="${DEFAULT_RELEASE_VERSION}"
+FLAG_WF_VERSION=""
+FLAG_WF_RELEASE_CHANNEL=""
 MANAGED_RESOURCE_GROUP=""
 PARAMETERS_CONFIGSTORE=""
 
@@ -40,14 +42,16 @@ Flags:
   -s  The Subscription ID where the Resource Group for the Managed Application exists (default: none)
   -g  The Resource Group where the Managed Application lives (default: none)
   -n  The name of the Managed Application (default: none)
-  -r  The branch name or tag of the Wayfinder Azure release to deploy (default: '${DEFAULT_RELEASE_VERSION}')
+  -b  The branch name or tag of the Wayfinder Azure release to deploy (default: '${DEFAULT_RELEASE_VERSION}')
+  -v  The version of Wayfinder to upgrade to, e.g. 'v1.6.1' (default: none)
+  -r  The release channel for the Wayfinder version, e.g. 'releases' (default: none)
   -h  show this help\n"
 }
 
 # Check that all required arguments have been supplied.
 check_required_arguments() {
     echo "--> Checking if required flags have been provided."
-    for var in "FLAG_SUBSCRIPTION" "FLAG_RESOURCE_GROUP" "FLAG_NAME" "FLAG_RELEASE"; do
+    for var in "FLAG_SUBSCRIPTION" "FLAG_RESOURCE_GROUP" "FLAG_NAME" "FLAG_RELEASE" "FLAG_WF_VERSION" "FLAG_WF_RELEASE_CHANNEL"; do
         if [ -z "${!var}" ]; then
             echo "Error: Variable ${var} has no value."
             print_usage
@@ -63,6 +67,7 @@ fetch_parameters_configstore() {
     local configstore_name=$(az appconfig list --subscription ${FLAG_SUBSCRIPTION} -g ${MANAGED_RESOURCE_GROUP} --query "[0].name" -o tsv)
     az appconfig kv export --subscription ${FLAG_SUBSCRIPTION} -n ${configstore_name} -d file --path ${PARAMETERS_FILE} --format json --yes
     PARAMETERS_CONFIGSTORE=$(jq -r 'del(.wfPlanId, .wfDimension, .wfDimensionInclusiveAmount) | to_entries | .[] | {(.key) : {value: .value}}' ${PARAMETERS_FILE} | jq -cs add)
+    PARAMETERS_CONFIGSTORE=$(jq -c ".version.value = \"$FLAG_WF_VERSION\" | .releases.value = \"$FLAG_WF_RELEASE_CHANNEL\"" <<< "$PARAMETERS_CONFIGSTORE")
 }
 
 # Fetch the name of the Managed Resource Group where the Wayfinder resources reside.
@@ -75,7 +80,7 @@ fetch_mrg_name() {
 upgrade() {
     local deployment_name="wf-upgrade-${TIMESTAMP}-${FLAG_RELEASE}"
     echo "--> Performing an upgrade of Wayfinder, deployment name is '${deployment_name}'."
-    az deployment group create --name ${deployment_name} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/azuredeploy.json --parameters ${PARAMETERS_CONFIGSTORE}
+    az deployment group create --name ${deployment_name} --subscription ${FLAG_SUBSCRIPTION} --resource-group ${MANAGED_RESOURCE_GROUP} --template-uri https://raw.githubusercontent.com/appvia/wayfinder-azure/${FLAG_RELEASE}/arm-template/azuredeploy.json --parameters ${PARAMETERS_CONFIGSTORE}
 }
 
 # The main function
@@ -87,12 +92,14 @@ main() {
 }
 
 # Parse arguments provided to the script and error if any are unexpected
-while getopts 's:g:n:r:h' flag; do
+while getopts 's:g:n:b:v:r:h' flag; do
     case "${flag}" in
         s) FLAG_SUBSCRIPTION="${OPTARG}" ;;
         g) FLAG_RESOURCE_GROUP="${OPTARG}" ;;
         n) FLAG_NAME="${OPTARG}" ;;
-        r) FLAG_RELEASE="${OPTARG}" ;;
+        b) FLAG_RELEASE="${OPTARG}" ;;
+        v) FLAG_WF_VERSION="${OPTARG}" ;;
+        r) FLAG_WF_RELEASE_CHANNEL="${OPTARG}" ;;
         h) print_usage && exit 0 ;;
         *) print_usage
         exit 1 ;;

@@ -603,6 +603,10 @@
     "WayfinderPortalURL": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.URLs.UI]"
+    },
+    "LicenseID": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.LicenseID]"
     }
   }
 }
