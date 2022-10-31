@@ -16,9 +16,24 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Extract version for Marketplace Plan
+        id: get-version
+        run: |
+          GITHUB_TAG=${GITHUB_REF##*/}
+          WF_VERSION=`echo ${GITHUB_TAG} | cut -d '-' -f 1 | cut -d 'v' -f 2`
+          ARM_TEMPLATE_ITERATION=`echo ${GITHUB_TAG#*arm.}`
+          if [[ $ARM_TEMPLATE_ITERATION != "1" ]]; then let "ARM_TEMPLATE_ITERATION+=1"; else ARM_TEMPLATE_ITERATION=""; fi
+          echo "::set-output name=package-version::${WF_VERSION}${ARM_TEMPLATE_ITERATION}"
+
       - name: Create a GitHub Release
         uses: softprops/action-gh-release@v1
         with:
+          body: |
+            ## Azure Marketplace
+
+            **Technical Configuration Version:** ${{ steps.get-version.outputs.package-version }}
+            **Technical Configuration Link:** https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/3b0884cf-abb0-46cf-a48b-55ee7245e8a9/plans/79f87324-ae57-4ec9-a648-5d6cca31b781/technicalconfiguration
+            **Offer Link:** https://azuremarketplace.microsoft.com/en-gb/marketplace/apps/appvialtd.wayfinder?tab=Overview
           draft: false
           prerelease: false
           generate_release_notes: true
