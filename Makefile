@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 .DEFAULT_GOAL := dist
 BUILD_DIR=.build
 TEMPLATE_DIR=arm-template

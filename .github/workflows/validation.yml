@@ -1,6 +1,5 @@
 name: validation
 
-# Controls when the workflow will run
 on:
   pull_request
 
@@ -9,9 +8,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a makefile command to build a zip containing the Marketplace template files
-      - name: Build app.zip
-        run: make dist
+      - name: Install pwsh packages
+        run: |
+          # Update the list of packages
+          sudo apt-get update
+          # Install pre-requisite packages.
+          sudo apt-get install -y wget apt-transport-https software-properties-common
+          # Download the Microsoft repository GPG keys
+          wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+          # Register the Microsoft repository GPG keys
+          sudo dpkg -i packages-microsoft-prod.deb
+          # Update the list of packages after we added packages.microsoft.com
+          sudo apt-get update
+          # Install PowerShell
+          sudo apt-get install -y powershell
+
+      - name: Run AZ test suite
+        run: |
+          wget https://aka.ms/arm-ttk-latest
+          unzip arm-ttk-latest -d zip-output/
+          pwsh -Command "& {Import-Module ./zip-output/arm-ttk/arm-ttk.psd1 && Test-AzMarketplacePackage ./arm-template/}"
