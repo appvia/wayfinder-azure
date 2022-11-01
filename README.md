@@ -95,7 +95,13 @@ Tags are produced off the `develop` branch, validated and tested in the Azure Ma
 
 Run the below command to accept terms for the relevant Offer:
 ```sh
-az vm image accept-terms --publisher appvialtd --offer wayfinder --plan standard --subscription <subscription-id>
+SUBSCRIPTION_ID="f21fbcee-a453-4e05-9d85-28a8bdb2970f" # Replace with your ID
+
+# Live Offer
+az vm image terms accept --publisher appvialtd --offer wayfinder --plan standard --subscription ${SUBSCRIPTION_ID}
+
+# E2E dev-latest Offer
+az vm image terms accept --publisher appvialtd --offer wayfindertest-preview --plan standard --subscription ${SUBSCRIPTION_ID}
 ```
 
 **Deploy Live & Tagged Version:**
@@ -116,7 +122,7 @@ az managedapp create --subscription <subscription-id> -g <rg-for-managed-app> -n
 ```sh
 MRG_NAME="mrg-wayfinder-$(date '+%Y%M%d%H%M%S')"
 
-az managedapp create --subscription <subscription-id> -g <rg-for-managed-app> -n wfmanagedappname -l uksouth --kind Marketplace --plan-version <azure-plan-version> --plan-publisher appvialtd --plan-product wayfindertest-preview --plan-name standard -m /subscriptions/<subscription-id>/resourceGroups/${MRG_NAME}
+az managedapp create --subscription <subscription-id> -g <rg-for-managed-app> -n wfmanagedappname -l uksouth --kind Marketplace --plan-version 0.0.0 --plan-publisher appvialtd --plan-product wayfindertest-preview --plan-name standard -m /subscriptions/<subscription-id>/resourceGroups/${MRG_NAME}
 ```
 
 ## Upgrade
