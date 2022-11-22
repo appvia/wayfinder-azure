@@ -106,21 +106,21 @@ az vm image terms accept --publisher appvialtd --offer wayfindertest-preview --p
 
 **Deploy Live & Tagged Version:**
 ```sh
-MRG_NAME="mrg-wayfinder-$(date '+%Y%M%d%H%M%S')"
+MRG_NAME="mrg-wayfinder-$(date '+%Y%m%d%H%M%S')"
 
 az managedapp create --subscription <subscription-id> -g <rg-for-managed-app> -n wfmanagedappname -l uksouth --kind Marketplace --plan-version <azure-plan-version> --plan-publisher appvialtd --plan-product wayfinder --plan-name standard -m /subscriptions/<subscription-id>/resourceGroups/${MRG_NAME}
 ```
 
 **Override the Wayfinder installer version:**
 ```sh
-MRG_NAME="mrg-wayfinder-$(date '+%Y%M%d%H%M%S')"
+MRG_NAME="mrg-wayfinder-$(date '+%Y%m%d%H%M%S')"
 
 az managedapp create --subscription <subscription-id> -g <rg-for-managed-app> -n wfmanagedappname -l uksouth --kind Marketplace --plan-version <azure-plan-version> --plan-publisher appvialtd --plan-product wayfinder --plan-name standard -m /subscriptions/<subscription-id>/resourceGroups/${MRG_NAME} --parameters '{ "releases": { "value": "releases" }, "version": { "value": "v1.6.1" } }'
 ```
 
 **Deploy unlisted E2E version:**
 ```sh
-MRG_NAME="mrg-wayfinder-$(date '+%Y%M%d%H%M%S')"
+MRG_NAME="mrg-wayfinder-$(date '+%Y%m%d%H%M%S')"
 
 az managedapp create --subscription <subscription-id> -g <rg-for-managed-app> -n wfmanagedappname -l uksouth --kind Marketplace --plan-version 0.0.0 --plan-publisher appvialtd --plan-product wayfindertest-preview --plan-name standard -m /subscriptions/<subscription-id>/resourceGroups/${MRG_NAME}
 ```
