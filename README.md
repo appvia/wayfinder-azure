@@ -73,7 +73,7 @@ When uploading a new package file to the Azure listing, the version should follo
 **Example 1:**
 - **Product Version:** v1.6.1
 - **Repository Version:** v1.6.1-arm.1 (the first version)
-- **Marketplace Listing:** 1.6.1
+- **Marketplace Listing:** 1.6.11
 
 **Example 2:**
 - **Product Version:** v1.6.1
