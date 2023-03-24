@@ -332,7 +332,7 @@
         "nodeResourceGroup": "[variables('nodeResourceGroup')]",
         "dnsPrefix": "[parameters('clusterName')]",
         "enableRBAC": true,
-        "kubernetesVersion": "1.24.9",
+        "kubernetesVersion": "1.25.5",
         "networkProfile": {
           "networkPlugin": "azure",
           "networkPolicy": "calico",
@@ -590,19 +590,23 @@
   "outputs": {
     "CreateLoginProfile": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.PostInstallCommands.firstLogin]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.postInstallCommands.firstLogin]"
     },
     "ChangeLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.PostInstallCommands.changePassword]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.postInstallCommands.changePassword]"
+    },
+    "LoginUsername": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.user.name]"
     },
     "InitialLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.User.Password]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.user.password]"
     },
     "WayfinderPortalURL": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.URLs.UI]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.urls.ui]"
     }
   }
 }
