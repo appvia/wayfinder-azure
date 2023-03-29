@@ -365,7 +365,7 @@
       ],
       "properties": {
         "azCliVersion": "2.32.0",
-        "scriptContent": "sleep 600",
+        "scriptContent": "sleep 1200",
         "cleanupPreference": "OnSuccess",
         "retentionInterval": "PT4H",
         "timeout": "PT2H"
