@@ -365,7 +365,7 @@
       ],
       "properties": {
         "azCliVersion": "2.32.0",
-        "scriptContent": "sleep 600",
+        "scriptContent": "sleep 1200",
         "cleanupPreference": "OnSuccess",
         "retentionInterval": "PT4H",
         "timeout": "PT2H"
@@ -590,19 +590,23 @@
   "outputs": {
     "CreateLoginProfile": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.PostInstallCommands.firstLogin]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.postInstallCommands.firstLogin]"
     },
     "ChangeLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.PostInstallCommands.changePassword]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.postInstallCommands.changePassword]"
+    },
+    "LoginUsername": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.user.name]"
     },
     "InitialLoginCredentials": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.User.Password]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.user.password]"
     },
     "WayfinderPortalURL": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.URLs.UI]"
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', variables('deploymentWFInstaller'))).outputs.urls.ui]"
     }
   }
 }
