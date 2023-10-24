@@ -322,7 +322,7 @@
     {
       "comments": "*** AKS cluster with custom-named nodeResourceGroup and system assigned managed identity ***",
       "type": "Microsoft.ContainerService/managedClusters",
-      "apiVersion": "2021-10-01",
+      "apiVersion": "2023-01-02-preview",
       "name": "[parameters('clusterName')]",
       "location": "[parameters('location')]",
       "identity": {
@@ -337,6 +337,17 @@
           "networkPlugin": "azure",
           "networkPolicy": "calico",
           "loadBalancerSku": "standard"
+        },
+        "oidcIssuerProfile": {
+            "enabled": true
+        },
+        "workloadIdentity": {
+            "enabled": true
+        },
+        "securityProfile": {
+            "workloadIdentity": {
+                "enabled": true
+            }
         },
         "agentPoolProfiles": [
           {
