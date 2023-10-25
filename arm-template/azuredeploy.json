@@ -77,6 +77,7 @@
     "managedIdentityWF": "wayfinder-default",
     "deploymentWFInstaller": "wayfinder-installer",
     "deploymentGetAKSMI": "wayfinder-get-aks-mi",
+    "deploymentAddWorkLoadIdentity": "wayfinder-add-workload-identity",
     "deploymentNRGAccess": "wayfinder-nrg-access",
     "nodeResourceGroup": "[concat(resourceGroup().name,'-aks-nodes')]",
     "ingressIPName": "[concat(parameters('clusterName'), '-ingress')]",
@@ -423,6 +424,39 @@
               "value": "[reference(parameters('aksMiResourceId'),'2018-11-30','Full').properties.principalId]"
             }
           }
+        }
+      }
+    },
+    {
+      "comments": "*** Add a Workload Identity Federated credential to the Wayfinder default managed idenity ***",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2023-01-02-preview",
+      "name": "[variables('deploymentAddWorkLoadIdentity')]",
+      "resourceGroup": "[resourceGroup().id]",
+      "dependsOn": [
+        "[variables('managedIdentityWF')]",
+        "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]",
+        "[variables('deploymentGetAKSMI')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
+              "name": "[variables('managedIdentityWF')]",
+              "apiVersion": "2022-01-31-preview",
+              "properties": {
+                "audiences": [
+                  "api://AzureADTokenExchange"
+                ],
+                "subject": "system:serviceaccount:wayfinder:wayfinder-admin",
+                "issuer": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
+              }
+            }
+          ]
         }
       }
     },
