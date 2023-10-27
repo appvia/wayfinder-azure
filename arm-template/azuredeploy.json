@@ -441,7 +441,7 @@
     {
       "comments": "*** Add a Workload Identity Federated credential to the Wayfinder default managed idenity ***",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2023-01-02-preview",
+      "apiVersion": "2021-04-01",
       "name": "[variables('deploymentAddWorkLoadIdentity')]",
       "resourceGroup": "[resourceGroup().id]",
       "dependsOn": [
@@ -458,7 +458,7 @@
             {
               "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
               "name": "[variables('managedIdentityWF')]",
-              "apiVersion": "2022-01-31-preview",
+              "apiVersion": "2023-01-31",
               "properties": {
                 "audiences": [
                   "api://AzureADTokenExchange"
