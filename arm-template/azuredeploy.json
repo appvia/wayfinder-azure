@@ -384,7 +384,7 @@
       }
     },
     {
-      "comments": "*** After AKS cluster gets deployed, use inner-scope nested template to get AKS managed identity resourceId and principalId ***",
+      "comments": "*** After AKS cluster gets deployed, use inner-scope nested template to get AKS managed identity resourceId, principalId and OIDC details ***",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "[variables('deploymentGetAKSMI')]",
@@ -401,6 +401,9 @@
         "parameters": {
           "aksMiResourceId": {
             "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2021-10-01', 'Full').properties.identityProfile.kubeletIdentity.resourceId]"
+          },
+          "aksOIDCIssuerProfile": {
+            "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2021-10-01', 'Full').properties.oidcIssuerProfile]"
           }
         },
         "template": {
@@ -408,6 +411,10 @@
           "contentVersion": "1.0.0.0",
           "parameters": {
             "aksMiResourceId": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "aksOIDCIssuerProfile": {
               "type": "string",
               "defaultValue": ""
             }
@@ -422,6 +429,10 @@
             "aksMiPrincipalId": {
               "type": "string",
               "value": "[reference(parameters('aksMiResourceId'),'2018-11-30','Full').properties.principalId]"
+            },
+            "aksOIDCIssuerURL": {
+              "type": "string",
+              "value": "[reference(parameters('aksOIDCIssuerProfile'),'2018-11-30','Full').issuerURL]"
             }
           }
         }
@@ -453,7 +464,7 @@
                   "api://AzureADTokenExchange"
                 ],
                 "subject": "system:serviceaccount:wayfinder:wayfinder-admin",
-                "issuer": "[reference(variables('deploymentGetAKSMI')).outputs.aksMiResourceId.value]"
+                "issuer": "[reference(variables('deploymentGetAKSMI')).outputs.aksOIDCIssuerURL.value]"
               }
             }
           ]
